@@ -35,6 +35,35 @@
   .speed-pick button { background: var(--shade); border:0; border-radius:4px; padding:4px 8px; font-size:10px; cursor:pointer; font-weight:600; }
   .speed-pick button.active { background: var(--accent); color: white; }
 
+  /* BIG STAGE INDICATOR BAR */
+  .stages { display:grid; grid-template-columns: repeat(6, 1fr); gap:8px; padding:10px 14px; background:var(--card); border-bottom:1px solid var(--border); flex-shrink:0; }
+  .stage {
+    background: var(--shade); border: 2px solid var(--border); border-radius: 10px;
+    padding: 10px 8px; text-align: center; transition: all 0.35s ease;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position: relative; min-height: 70px;
+  }
+  .stage .stage-icon { font-size: 22px; line-height: 1; }
+  .stage .stage-name { font-size: 15px; font-weight: 900; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-top: 3px; line-height: 1.1; }
+  .stage .stage-sub { font-size: 9px; color: var(--muted); margin-top: 2px; font-weight: 600; opacity: 0.7; }
+  .stage.active {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    border-color: #0369a1;
+    box-shadow: 0 0 0 4px rgba(14,165,233,0.25), 0 4px 12px rgba(2,132,199,0.4);
+    transform: scale(1.04);
+    animation: stage-pulse 1.4s ease-in-out infinite;
+  }
+  .stage.active .stage-name, .stage.active .stage-sub, .stage.active .stage-icon { color: white; opacity: 1; }
+  .stage.done { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); border-color: #166534; }
+  .stage.done .stage-name, .stage.done .stage-sub, .stage.done .stage-icon { color: white; opacity: 1; }
+  .stage.done::after { content: "✓"; position: absolute; top: 4px; right: 7px; color: white; font-weight: 900; font-size: 14px; }
+  .stage.error { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-color: #991b1b; }
+  .stage.error .stage-name, .stage.error .stage-sub, .stage.error .stage-icon { color: white; opacity: 1; }
+  @keyframes stage-pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(14,165,233,0.25), 0 4px 12px rgba(2,132,199,0.4); }
+    50%      { box-shadow: 0 0 0 8px rgba(14,165,233,0.15), 0 6px 18px rgba(2,132,199,0.55); }
+  }
+
   .layout { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; padding:10px; flex:1; min-height:0; overflow:hidden; }
   .card { background:var(--card); border-radius:10px; padding:12px; box-shadow:var(--shadow-card); display:flex; flex-direction:column; min-height:0; overflow:hidden; }
   .card h2 { margin:0 0 8px; font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.7px; flex-shrink:0; }
@@ -142,6 +171,40 @@
   <button class="ghost" onclick="openTtsConfig()">⚙ Key</button>
   <span id="current-voice" style="font-size:10px;color:var(--purple);font-weight:600;min-width:90px"></span>
   <span id="demo-status" style="margin-left:auto;font-size:11px;color:var(--muted)"></span>
+</div>
+
+<!-- BIG STAGE INDICATOR BAR — shows where we are in the patient journey -->
+<div class="stages" id="stages">
+  <div class="stage" data-stage="intake">
+    <div class="stage-icon">🏥</div>
+    <div class="stage-name">Intake</div>
+    <div class="stage-sub">login · hub · call</div>
+  </div>
+  <div class="stage" data-stage="verify">
+    <div class="stage-icon">🛡️</div>
+    <div class="stage-name">Verify</div>
+    <div class="stage-sub">insurance · 270</div>
+  </div>
+  <div class="stage" data-stage="estimate">
+    <div class="stage-icon">💰</div>
+    <div class="stage-name">Estimate</div>
+    <div class="stage-sub">cost breakdown</div>
+  </div>
+  <div class="stage" data-stage="accept">
+    <div class="stage-icon">👍</div>
+    <div class="stage-name">Accept</div>
+    <div class="stage-sub">patient agrees</div>
+  </div>
+  <div class="stage" data-stage="schedule">
+    <div class="stage-icon">📅</div>
+    <div class="stage-name">Scheduled</div>
+    <div class="stage-sub">SMS · WhatsApp</div>
+  </div>
+  <div class="stage" data-stage="confirmed">
+    <div class="stage-icon">✅</div>
+    <div class="stage-name">Confirmed</div>
+    <div class="stage-sub">audit · sign · QA</div>
+  </div>
 </div>
 
 <div class="layout">
@@ -326,6 +389,37 @@ function _drainAudioQueue() {
   if (indicator) indicator.textContent = '🔊 ' + (persona || role || 'speaking');
 }
 
+// Map a step number to one of the 6 big-letter stages
+const STAGE_ORDER = ['intake','verify','estimate','accept','schedule','confirmed'];
+function stepToStage(step) {
+  if (step <= 8)   return 'intake';     // login → hub → outreach → outbound voice → voicemail → staff WA → inbound → reason
+  if (step <= 10)  return 'verify';     // 270 request + web-scrape fallback retry
+  if (step === 11) return 'estimate';   // Cost Estimate Agent breakdown
+  if (step === 12) return 'accept';     // Scheduling Agent proposes + patient agrees
+  if (step <= 15)  return 'schedule';   // Confirmation SMS + Dr. Chen WA + patient WA
+  return 'confirmed';                   // Exceptions, escalation, SPC, e-sig, plain-Eng, multi-lang, consent, export, EOS
+}
+function updateStage(step, opts) {
+  opts = opts || {};
+  const current = stepToStage(step);
+  const currentIdx = STAGE_ORDER.indexOf(current);
+  for (let i = 0; i < STAGE_ORDER.length; i++) {
+    const el = document.querySelector('.stage[data-stage="' + STAGE_ORDER[i] + '"]');
+    if (!el) continue;
+    el.classList.remove('active','done','error');
+    if (i < currentIdx)        el.classList.add('done');
+    else if (i === currentIdx) el.classList.add(opts.error ? 'error' : 'active');
+    // else: stays pending (default grey)
+  }
+}
+function markStageAsError(step) { updateStage(step, { error: true }); }
+function completeAllStages() {
+  document.querySelectorAll('.stage').forEach(el => { el.classList.remove('active','error'); el.classList.add('done'); });
+}
+function resetStages() {
+  document.querySelectorAll('.stage').forEach(el => el.classList.remove('active','done','error'));
+}
+
 async function init() {
   const r = await fetch('/v1/demo/script').then(r=>r.json());
   script = r.steps || [];
@@ -393,6 +487,8 @@ async function playDemo() {
       document.getElementById('progress-fill').style.width = (i / script.length * 100) + '%';
       const s = script.find(x => x.step === i);
       if (s) document.getElementById('current-scene').innerHTML = '<b>' + escapeHtml(s.title) + '</b><div style="font-size:11px;color:var(--muted);margin-top:4px">' + escapeHtml(s.scene) + '</div>';
+      // BIG-LETTER stage indicator — light up the stage box this step belongs to
+      updateStage(i);
       // Fire TTS for this step's voiced line (async — runs in parallel with step delay)
       if (s) playTtsForStep(s);
       await sleep(stepDelay);
@@ -420,6 +516,7 @@ async function playDemo() {
     document.getElementById('demo-status').innerHTML = '<span class="badge" style="background:#fee2e2;color:#991b1b">stopped</span> at step ' + (document.getElementById('kpi-steps').textContent) + ' · ' + ((Date.now() - demoStartTime)/1000).toFixed(1) + 's';
     document.getElementById('current-scene').innerHTML = '<b style="color:var(--bad)">■ Demo stopped</b><div style="font-size:10px;color:var(--muted);margin-top:2px">Click ↻ Reset to clear, or ▶ Play to restart.</div>';
   } else {
+    completeAllStages();
     document.getElementById('demo-status').innerHTML = '<span class="badge complete">complete</span> ' + (r.steps_run || 0) + ' steps · ' + ((Date.now() - demoStartTime)/1000).toFixed(1) + 's';
     document.getElementById('current-scene').innerHTML = '<b>✓ Demo complete</b><div style="font-size:10px;color:var(--muted);margin-top:2px">' + (r.steps_run||0) + ' steps · review left panel.</div>';
   }
@@ -439,6 +536,7 @@ function resetDemo() {
   document.querySelectorAll('.step').forEach(s => { s.classList.remove('active','done','error'); });
   document.querySelectorAll('.kpi-live .val').forEach(v => v.textContent = '0');
   document.getElementById('progress-fill').style.width = '0%';
+  resetStages();
   document.getElementById('messages').innerHTML = '<div class="placeholder">Click <b>▶ Play 2-Min Demo</b> to start.</div>';
   document.getElementById('current-scene').innerHTML = '<span class="placeholder">Demo idle.</span>';
   document.getElementById('agents-fired').textContent = '—';
