@@ -307,8 +307,8 @@ function ttsPlanForStep(s) {
   if (/Human-in-the-loop|Staff.*Escalation/i.test(t)) {
     return { role: 'escalation', text: 'Sending a WhatsApp to Maria with the full call script and one-tap resolve buttons.' };
   }
-  if (/SPC Chart|Western Electric/i.test(t)) {
-    return { role: 'intake_agent', text: 'Top critical patient: Abigail Rogers. P bar is ninety six percent over twenty eight appointments. Western Electric Rules one, two, and three have all fired. Risk score one hundred percent.' };
+  if (/Cancellation Analytics|Patient Risk|Risk Signals|SPC Chart|Western Electric/i.test(t)) {
+    return { role: 'intake_agent', text: 'Top critical patient: Abigail Rogers. Her probability of cancellation is ninety six percent across twenty eight appointments. Three independent risk signals have all triggered. Risk score one hundred percent.' };
   }
   if (/E-Signature|CFR Part 11/i.test(t)) {
     return { role: 'doctor', text: 'Doctor Chen signing the treatment plan with two factor authentication. Signature is chain hashed to the previous signature for tamper evidence per Twenty One C F R Part Eleven section eleven point ten E.' };
@@ -397,7 +397,7 @@ function stepToStage(step) {
   if (step === 11) return 'estimate';   // Cost Estimate Agent breakdown
   if (step === 12) return 'accept';     // Scheduling Agent proposes + patient agrees
   if (step <= 15)  return 'schedule';   // Confirmation SMS + Dr. Chen WA + patient WA
-  return 'confirmed';                   // Exceptions, escalation, SPC, e-sig, plain-Eng, multi-lang, consent, export, EOS
+  return 'confirmed';                   // Exceptions, escalation, risk analytics, e-sig, plain-Eng, multi-lang, consent, export, EOS
 }
 function updateStage(step, opts) {
   opts = opts || {};

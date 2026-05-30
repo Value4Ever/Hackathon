@@ -174,7 +174,7 @@ const AGENT_STEPS = [
   { state: 'INTAKE', name: 'Intake Agent', meta: 'Collect name · DOB · insurance', match: ['INTAKE_NEW_NAME','INTAKE_NEW_DOB','INTAKE_NEW_INSURANCE','EXISTING_REASON'] },
   { state: 'INSURANCE_VERIFICATION', name: 'Insurance Agent', meta: '270 request / web / voice call', match: ['INSURANCE_VERIFICATION'] },
   { state: 'COST_ESTIMATE', name: 'Cost Estimate Agent', meta: 'Treatment plan + benefits → OOP', match: ['COST_ESTIMATE','COST_ESTIMATE_SELF_PAY'] },
-  { state: 'SCHEDULING', name: 'Scheduling Agent', meta: 'SPC-driven slot policy', match: ['SCHEDULING'] },
+  { state: 'SCHEDULING', name: 'Scheduling Agent', meta: 'Risk-based slot policy', match: ['SCHEDULING'] },
   { state: 'CONFIRMATION', name: 'Confirmation', meta: 'Text + cost-estimate sent', match: ['CONFIRMATION'] },
 ];
 

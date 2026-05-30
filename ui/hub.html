@@ -189,7 +189,7 @@
     <div class="flow-legend">
       <span><span class="dot" style="background:var(--accent)"></span> click any agent to open its tool</span>
       <span><span class="dot" style="background:var(--bad)"></span> failure → human in the loop</span>
-      <span><span class="dot" style="background:var(--good)"></span> SPC-driven scheduling policy (deposit if high-risk)</span>
+      <span><span class="dot" style="background:var(--good)"></span> Risk-based scheduling policy (deposit if high-risk)</span>
     </div>
   </div>
 
@@ -211,7 +211,7 @@
     <a href="/clinic" class="qa-card">
       <div class="icon">📊</div>
       <div class="title">Outreach scheduler</div>
-      <div class="desc">1000-patient SPC dashboard. Critical-risk patients · auto-generated outreach campaigns · Western Electric rule findings.</div>
+      <div class="desc">1000-patient risk dashboard. Critical cancellation risk · auto-generated outreach campaigns · pattern-based risk alerts.</div>
       <div class="cta">View dashboard →</div>
     </a>
     <a href="#" onclick="runBatchOutreach();event.preventDefault();" class="qa-card">
@@ -297,7 +297,7 @@ async function init() {
 
   // Scheduling node text
   const schedNode = document.getElementById('schedule-node');
-  schedNode.innerHTML = '<div class="num">4</div><div class="name">Scheduling Agent</div><div class="desc">SPC + WE rules · proposes slot · deposit policy by risk band</div>';
+  schedNode.innerHTML = '<div class="num">4</div><div class="name">Scheduling Agent</div><div class="desc">Patient analytics · proposes slot · deposit policy by risk band</div>';
 
   // Alerts (composed from stats + critical patients)
   renderAlerts(stats, critical.patients, high.patients);
@@ -325,7 +325,7 @@ function renderAlerts(stats, critical, high) {
   if (critical.length > 10) alerts.push({ severity: 'critical', text: '<b>' + critical.length + ' patients in critical no-show band</b> — they have >50% probability of missing their next appointment. Call them personally (script available in Outreach Scheduler).' });
   if ((stats.outstanding_payments?.n || 0) > 200) alerts.push({ severity: 'warn', text: '<b>' + stats.outstanding_payments.n + ' outstanding invoices</b> totaling $' + Math.round(stats.outstanding_payments.t).toLocaleString() + ' — recommend AR collection campaign.' });
   if ((stats.pending_treatment_total || 0) > 500000) alerts.push({ severity: 'info', text: '<b>$' + Math.round(stats.pending_treatment_total).toLocaleString() + ' in pending treatment plans</b> — patients haven\'t accepted. Run outreach with cost-estimate text.' });
-  alerts.push({ severity: 'info', text: 'Western Electric Rule 1 (point outside ±3σ) is firing on <b>' + critical.filter(c => c.we_critical_count > 0).length + '</b> patients — those are statistically unusual and need immediate attention.' });
+  alerts.push({ severity: 'info', text: '<b>' + critical.filter(c => c.we_critical_count > 0).length + '</b> patients show extreme cancellation-risk signals — they need immediate attention.' });
   if (alerts.length === 0) alerts.push({ severity: 'info', text: '✓ No active alerts. Operations running smoothly.' });
   out.innerHTML = alerts.map(a => '<div class="alert ' + a.severity + '">' + a.text + '</div>').join('');
 }

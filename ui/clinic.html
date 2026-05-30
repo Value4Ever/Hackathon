@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Clinic Scheduler · SPC Dashboard</title>
+<title>Clinic Scheduler · Patient Risk Analytics</title>
 <style>
   :root {
     --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b;
@@ -55,7 +55,7 @@
   .pill.critical { background:var(--critical-bg); color:var(--critical-text); }
   .pill.archetype { background: var(--shade); color: var(--text); }
 
-  /* SPC chart */
+  /* Cancellation-risk trend chart */
   .spc-chart {
     position: relative; height: 200px; background: linear-gradient(to bottom, #fee2e2 0%, #fee2e2 11.1%, #fed7aa 11.1%, #fed7aa 22.2%, #fef3c7 22.2%, #fef3c7 33.3%, #f0fdf4 33.3%, #f0fdf4 66.7%, #fef3c7 66.7%, #fef3c7 77.8%, #fed7aa 77.8%, #fed7aa 88.9%, #fee2e2 88.9%);
     border: 1px solid var(--border); border-radius: 6px; padding: 8px 8px 24px;
@@ -111,8 +111,8 @@
 <body>
 <header>
   <div>
-    <h1>📊 Clinic Scheduler · SPC Dashboard</h1>
-    <div class="sub">Risk-stratified no-show prediction · Western Electric Rules · Auto outreach</div>
+    <h1>📊 Clinic Scheduler · Patient Risk Analytics</h1>
+    <div class="sub">Patient analytics · Probability of cancellation · Auto outreach</div>
   </div>
   <nav>
     <a href="/">Eligibility Verifier</a>
@@ -131,7 +131,7 @@
     </div>
 
     <div class="card">
-      <h2>Patients · ranked by no-show risk (SPC + WE rules)</h2>
+      <h2>Patients · ranked by probability of cancellation</h2>
       <div class="filters">
         <span class="label">Filter:</span>
         <button class="active" data-band="" onclick="setBand('')">All</button>
@@ -144,7 +144,7 @@
       <div style="max-height:600px;overflow-y:auto">
         <table id="patient-table">
           <thead>
-            <tr><th>ID</th><th>Name</th><th>Risk</th><th class="num">Score</th><th class="num">p̄</th><th class="num">n</th><th>WE Rules</th><th>Archetype</th><th>Channel</th></tr>
+            <tr><th>ID</th><th>Name</th><th>Risk</th><th class="num">Score</th><th class="num">Cancel %</th><th class="num">Visits</th><th>Risk signals</th><th>Archetype</th><th>Channel</th></tr>
           </thead>
           <tbody id="patient-tbody">
             <tr><td colspan="9" class="placeholder"><span class="spinner"></span> Loading patients...</td></tr>
@@ -161,9 +161,9 @@
   <!-- RIGHT: detail panel -->
   <div>
     <div class="card" id="detail-card">
-      <h2>Patient detail · SPC chart · outreach campaign</h2>
+      <h2>Patient detail · Risk analysis · Outreach campaign</h2>
       <div id="detail">
-        <div class="placeholder">Click a patient on the left to view SPC chart, WE rules, and auto-generated outreach campaign.</div>
+        <div class="placeholder">Click a patient on the left to view their risk analysis and auto-generated outreach campaign.</div>
       </div>
     </div>
   </div>
@@ -235,7 +235,7 @@ async function selectPatient(pid) {
   selectedPatientId = pid;
   renderTable();
   const detail = document.getElementById('detail');
-  detail.innerHTML = '<div class="placeholder"><span class="spinner"></span> Loading SPC analysis + outreach campaign...</div>';
+  detail.innerHTML = '<div class="placeholder"><span class="spinner"></span> Loading patient risk analysis + outreach campaign...</div>';
   const [spc, camp] = await Promise.all([
     fetch('/v1/clinic/patients/' + pid).then(r=>r.json()),
     fetch('/v1/clinic/patients/' + pid + '/campaign').then(r=>r.json())
@@ -252,26 +252,25 @@ function renderDetail(spc, camp) {
     'Last cleaning: <b>' + (p.last_cleaning_date || 'never') + '</b> · recall interval: ' + (p.recall_interval_months || '?') + ' months · pending tx: $' + (camp.pending_treatment_value || 0).toFixed(0) +
     '</div>';
 
-  // SPC chart
+  // Cancellation-risk trend chart
   if (spc.series && spc.series.length > 0) {
-    html += '<h3 style="margin:14px 0 6px;font-size:13px">SPC p-chart · ' + spc.n + ' appointments analyzed</h3>';
+    html += '<h3 style="margin:14px 0 6px;font-size:13px">📈 Cancellation history · ' + spc.n + ' appointments analyzed</h3>';
     html += '<div style="font-size:11px;color:var(--muted);margin-bottom:6px">' +
-      'p̄ (centerline) = <b>' + (spc.p_bar*100).toFixed(1) + '%</b> · ' +
-      'σ = ' + spc.sigma.toFixed(3) + ' · ' +
-      'UCL = ' + (spc.ucl*100).toFixed(0) + '% · LCL = ' + (spc.lcl*100).toFixed(0) + '%' +
+      'Probability of cancellation: <b>' + (spc.p_bar*100).toFixed(1) + '%</b> · ' +
+      'High-risk threshold: ' + (spc.ucl*100).toFixed(0) + '%' +
       '</div>';
     html += renderSpcChart(spc);
     html += '<div style="font-size:11px;color:var(--muted);margin-top:4px"><span style="color:var(--good)">●</span> attended &nbsp; <span style="color:var(--bad)">●</span> missed (no-show or same-day cancel)</div>';
   }
 
-  // WE rule findings
+  // Risk signal findings (pattern analysis on the patient's history)
   if (spc.we_rules_triggered && spc.we_rules_triggered.length > 0) {
-    html += '<h3 style="margin:18px 0 6px;font-size:13px">⚠ Western Electric Rule findings (' + spc.we_rules_triggered.length + ')</h3>';
+    html += '<h3 style="margin:18px 0 6px;font-size:13px">⚠ Risk signals detected (' + spc.we_rules_triggered.length + ')</h3>';
     for (const f of spc.we_rules_triggered.slice(0, 8)) {
-      html += '<div class="we-finding ' + f.severity + '"><span class="rule">RULE ' + f.rule + '</span>' + f.description + '</div>';
+      html += '<div class="we-finding ' + f.severity + '"><span class="rule">SIGNAL ' + f.rule + '</span>' + f.description + '</div>';
     }
   } else {
-    html += '<div style="margin:14px 0;padding:10px;background:var(--low-bg);border-radius:6px;color:var(--low-text);font-size:12px"><b>✓ No Western Electric rule violations</b> — process is in statistical control.</div>';
+    html += '<div style="margin:14px 0;padding:10px;background:var(--low-bg);border-radius:6px;color:var(--low-text);font-size:12px"><b>✓ No risk signals detected</b> — patient cancellation pattern is normal.</div>';
   }
 
   // Risk-aware campaign
@@ -332,13 +331,9 @@ function renderSpcChart(spc) {
   // Control lines
   const z = spc.zones;
   const linesHtml =
-    '<div class="control-line ucl-lcl" style="top:' + yFor(z.upper_3s) + 'px"><span class="label-zone">UCL ' + (z.upper_3s*100).toFixed(0) + '%</span></div>' +
-    (z.upper_2s < z.upper_3s ? '<div class="control-line" style="top:' + yFor(z.upper_2s) + 'px"><span class="label-zone">+2σ</span></div>' : '') +
-    (z.upper_1s < z.upper_2s ? '<div class="control-line" style="top:' + yFor(z.upper_1s) + 'px"><span class="label-zone">+1σ</span></div>' : '') +
-    '<div class="control-line centerline" style="top:' + yFor(z.centerline) + 'px"><span class="label-zone">p̄ ' + (z.centerline*100).toFixed(0) + '%</span></div>' +
-    (z.lower_1s > 0 ? '<div class="control-line" style="top:' + yFor(z.lower_1s) + 'px"><span class="label-zone">-1σ</span></div>' : '') +
-    (z.lower_2s > 0 ? '<div class="control-line" style="top:' + yFor(z.lower_2s) + 'px"><span class="label-zone">-2σ</span></div>' : '') +
-    (z.lower_3s > 0 ? '<div class="control-line ucl-lcl" style="top:' + yFor(z.lower_3s) + 'px"><span class="label-zone">LCL ' + (z.lower_3s*100).toFixed(0) + '%</span></div>' : '');
+    '<div class="control-line ucl-lcl" style="top:' + yFor(z.upper_3s) + 'px"><span class="label-zone">High ' + (z.upper_3s*100).toFixed(0) + '%</span></div>' +
+    '<div class="control-line centerline" style="top:' + yFor(z.centerline) + 'px"><span class="label-zone">Avg ' + (z.centerline*100).toFixed(0) + '%</span></div>' +
+    (z.lower_3s > 0 ? '<div class="control-line ucl-lcl" style="top:' + yFor(z.lower_3s) + 'px"><span class="label-zone">Low ' + (z.lower_3s*100).toFixed(0) + '%</span></div>' : '');
 
   return '<div class="spc-chart" style="margin-left:32px">' +
     '<div class="axis-y"><div>100%</div><div>75%</div><div>50%</div><div>25%</div><div>0%</div></div>' +
