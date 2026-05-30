@@ -13,43 +13,49 @@
     --wa-bg: #25d366; --sms-bg: #06b6d4; --voice-bg: #8b5cf6; --email-bg: #16a34a;
   }
   * { box-sizing: border-box; }
-  body { margin:0; padding:0; background: var(--bg); color: var(--text); font: 13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; }
-  header { background: linear-gradient(135deg,#0f172a 0%,#1e293b 100%); color:white; padding: 18px 24px; display:flex; justify-content:space-between; align-items:center; }
-  header h1 { margin:0; font-size:20px; font-weight:700; }
-  header .sub { font-size:12px; opacity:0.75; margin-top:3px; }
-  header nav a { color:white; text-decoration:none; padding:6px 12px; border-radius:6px; margin-left:6px; font-size:12px; opacity:0.7; }
+  html, body { height:100vh; overflow:hidden; }
+  body { margin:0; padding:0; background: var(--bg); color: var(--text); font: 13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; display:flex; flex-direction:column; }
+  header { background: linear-gradient(135deg,#0f172a 0%,#1e293b 100%); color:white; padding: 8px 18px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+  header h1 { margin:0; font-size:16px; font-weight:700; }
+  header .sub { font-size:10px; opacity:0.7; margin-top:1px; }
+  header nav a { color:white; text-decoration:none; padding:4px 10px; border-radius:6px; margin-left:4px; font-size:11px; opacity:0.7; }
   header nav a:hover, header nav a.active { background: rgba(255,255,255,0.15); opacity:1; }
 
-  .layout { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px; padding:16px; max-width:1700px; margin:0 auto; }
-  .card { background:var(--card); border-radius:10px; padding:16px; box-shadow:var(--shadow-card); display:flex; flex-direction:column; }
-  .card h2 { margin:0 0 12px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; }
-
-  .controls { background: var(--card); border-radius: 10px; padding: 16px; box-shadow: var(--shadow-card); margin: 16px; display:flex; gap:10px; align-items:center; }
-  button.primary { background: var(--accent); color:white; border:0; border-radius:6px; padding:10px 20px; font-size:13px; font-weight:700; cursor:pointer; }
+  .controls { background: var(--card); border-bottom:1px solid var(--border); padding: 8px 14px; display:flex; gap:8px; align-items:center; flex-shrink:0; flex-wrap:wrap; }
+  button.primary { background: var(--accent); color:white; border:0; border-radius:6px; padding:8px 16px; font-size:12px; font-weight:700; cursor:pointer; }
   button.primary:hover { background: #0284c7; }
   button.primary:disabled { background: var(--muted); cursor: not-allowed; }
-  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-size: 12px; cursor: pointer; font-weight: 600; }
-  .speed-pick { display:flex; gap:4px; }
-  .speed-pick button { background: var(--shade); border:0; border-radius:4px; padding:5px 10px; font-size:11px; cursor:pointer; font-weight:600; }
+  button.danger { background: var(--bad); color:white; border:0; border-radius:6px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; }
+  button.danger:hover { background: #b91c1c; }
+  button.danger:disabled { background: var(--muted); cursor: not-allowed; opacity:0.5; }
+  button.warn { background: var(--warn); color:white; border:0; border-radius:6px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; }
+  button.warn:hover { background: #b45309; }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 11px; cursor: pointer; font-weight: 600; }
+  .speed-pick { display:flex; gap:3px; }
+  .speed-pick button { background: var(--shade); border:0; border-radius:4px; padding:4px 8px; font-size:10px; cursor:pointer; font-weight:600; }
   .speed-pick button.active { background: var(--accent); color: white; }
 
+  .layout { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; padding:10px; flex:1; min-height:0; overflow:hidden; }
+  .card { background:var(--card); border-radius:10px; padding:12px; box-shadow:var(--shadow-card); display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+  .card h2 { margin:0 0 8px; font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.7px; flex-shrink:0; }
+
   /* Step timeline */
-  .timeline { max-height: 700px; overflow-y: auto; padding-right: 4px; }
+  .timeline { flex:1; overflow-y: auto; padding-right: 4px; min-height:0; }
   .step {
-    border-left: 3px solid var(--border); padding: 12px 14px; margin: 8px 0;
-    background: var(--shade); border-radius: 0 8px 8px 0; transition: all 0.3s;
+    border-left: 3px solid var(--border); padding: 6px 10px; margin: 4px 0;
+    background: var(--shade); border-radius: 0 6px 6px 0; transition: all 0.3s;
   }
   .step.active { border-left-color: var(--accent); background: #e0f2fe; }
   .step.done { border-left-color: var(--good); background: #f0fdf4; }
   .step.error { border-left-color: var(--bad); background: #fef2f2; }
-  .step .scene { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-  .step .title { font-size: 13px; font-weight: 700; margin-top: 4px; }
-  .step .desc { font-size: 12px; color: var(--text); margin-top: 4px; line-height: 1.45; }
-  .step .result { font-size: 11px; color: var(--muted); font-family: ui-monospace,Menlo,monospace; margin-top: 6px; max-height: 60px; overflow: hidden; }
+  .step .scene { font-size: 9px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+  .step .title { font-size: 11px; font-weight: 700; margin-top: 2px; line-height: 1.3; }
+  .step .desc { font-size: 10px; color: var(--text); margin-top: 2px; line-height: 1.3; }
+  .step .result { font-size: 9px; color: var(--muted); font-family: ui-monospace,Menlo,monospace; margin-top: 3px; max-height: 32px; overflow: hidden; }
   .step .num {
-    display:inline-block; background: var(--muted); color: white; width: 22px; height: 22px;
-    border-radius: 50%; text-align: center; line-height: 22px; font-weight: 700; font-size: 11px;
-    margin-right: 8px;
+    display:inline-block; background: var(--muted); color: white; width: 18px; height: 18px;
+    border-radius: 50%; text-align: center; line-height: 18px; font-weight: 700; font-size: 10px;
+    margin-right: 6px;
   }
   .step.active .num { background: var(--accent); animation: pulse 1s ease-in-out infinite; }
   .step.done .num { background: var(--good); }
@@ -57,11 +63,11 @@
   @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
 
   /* Messages stream */
-  .messages { max-height: 700px; overflow-y: auto; padding-right: 4px; }
+  .messages { flex:1; overflow-y: auto; padding-right: 4px; min-height:0; }
   .msg {
-    padding: 10px 12px; margin: 6px 0; border-radius: 8px;
-    font-size: 12px; line-height: 1.45;
-    border-left: 4px solid;
+    padding: 6px 9px; margin: 4px 0; border-radius: 6px;
+    font-size: 11px; line-height: 1.35;
+    border-left: 3px solid;
   }
   .msg.whatsapp { background: #f0fdf4; border-color: var(--wa-bg); }
   .msg.sms { background: #ecfeff; border-color: var(--sms-bg); }
@@ -85,15 +91,16 @@
   .msg .status.failed { color: var(--bad); }
 
   /* Live KPI panel */
-  .kpis-live { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .kpi-live { background: var(--shade); padding: 12px; border-radius: 8px; }
-  .kpi-live .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
-  .kpi-live .val { font-size: 24px; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .right-panel { flex:1; overflow-y:auto; min-height:0; padding-right:4px; }
+  .kpis-live { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .kpi-live { background: var(--shade); padding: 6px 8px; border-radius: 6px; }
+  .kpi-live .lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700; }
+  .kpi-live .val { font-size: 18px; font-weight: 800; margin-top: 0; font-variant-numeric: tabular-nums; line-height:1.1; }
   .kpi-live.good .val { color: var(--good); }
   .kpi-live.warn .val { color: var(--warn); }
   .kpi-live.critical .val { color: var(--bad); }
 
-  .progress-bar { height: 6px; background: var(--shade); border-radius: 3px; overflow: hidden; margin: 10px 0; }
+  .progress-bar { height: 5px; background: var(--shade); border-radius: 3px; overflow: hidden; margin: 6px 0; }
   .progress-bar .fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--good)); transition: width 0.4s; }
 
   .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; }
@@ -106,7 +113,7 @@
 <header>
   <div>
     <h1>🎬 Demo Theater · End-to-End</h1>
-    <div class="sub">Live walkthrough — outbound calls, insurance verification w/ retry loop, inbound call orchestration, WhatsApp/SMS/voice to patients/staff/doctor</div>
+    <div class="sub">Live walkthrough — verify · retry · cost · schedule · escalate · sign · alert</div>
   </div>
   <nav>
     <a href="/">Hub</a>
@@ -118,21 +125,29 @@
 </header>
 
 <div class="controls">
-  <button class="primary" id="play-btn" onclick="playDemo()">▶ Play End-to-End Demo</button>
+  <button class="primary" id="play-btn" onclick="playDemo()">▶ Play 2-Min Demo</button>
+  <button class="danger" id="stop-btn" onclick="stopDemo()" disabled>■ Stop</button>
+  <button class="warn" id="reset-btn" onclick="resetDemo()">↻ Reset</button>
+  <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
   <div class="speed-pick">
-    <span style="font-size:11px;color:var(--muted);align-self:center;margin-right:6px">Speed:</span>
-    <button data-speed="fast" class="active" onclick="setSpeed('fast')">Fast (3s)</button>
-    <button data-speed="normal" onclick="setSpeed('normal')">Normal (15s)</button>
-    <button data-speed="slow" onclick="setSpeed('slow')">Slow (45s)</button>
+    <span style="font-size:10px;color:var(--muted);align-self:center;margin-right:4px;font-weight:600">SPEED</span>
+    <button data-speed="fast" onclick="setSpeed('fast')">Fast</button>
+    <button data-speed="2min" class="active" onclick="setSpeed('2min')">2 min</button>
+    <button data-speed="normal" onclick="setSpeed('normal')">Normal</button>
+    <button data-speed="slow" onclick="setSpeed('slow')">Slow</button>
   </div>
-  <span id="demo-status" style="margin-left:auto;font-size:12px;color:var(--muted)"></span>
-  <button class="ghost" onclick="resetDemo()">Reset</button>
+  <label style="font-size:10px;color:var(--muted);margin-left:6px;display:flex;align-items:center;gap:3px">
+    <input type="checkbox" id="tts-enabled" checked /> 🔊 Voice
+  </label>
+  <button class="ghost" onclick="openTtsConfig()">⚙ Key</button>
+  <span id="current-voice" style="font-size:10px;color:var(--purple);font-weight:600;min-width:90px"></span>
+  <span id="demo-status" style="margin-left:auto;font-size:11px;color:var(--muted)"></span>
 </div>
 
 <div class="layout">
-  <!-- LEFT: 18-step timeline -->
+  <!-- LEFT: timeline -->
   <div class="card">
-    <h2>📋 Scripted timeline · 18 steps</h2>
+    <h2>📋 Scripted timeline</h2>
     <div class="timeline" id="timeline">
       <div class="placeholder"><span class="spinner"></span> Loading script...</div>
     </div>
@@ -140,47 +155,187 @@
 
   <!-- MIDDLE: live messages -->
   <div class="card">
-    <h2>💬 Live message stream · all channels</h2>
+    <h2>💬 Live message stream</h2>
     <div class="messages" id="messages">
-      <div class="placeholder">Click <b>Play</b> to start the demo.</div>
+      <div class="placeholder">Click <b>▶ Play 2-Min Demo</b> to start.</div>
     </div>
   </div>
 
   <!-- RIGHT: live KPIs + agent state -->
   <div class="card">
     <h2>📊 Live KPIs</h2>
-    <div class="kpis-live">
-      <div class="kpi-live"><div class="lbl">Steps run</div><div class="val" id="kpi-steps">0</div></div>
-      <div class="kpi-live good"><div class="lbl">Messages sent</div><div class="val" id="kpi-messages">0</div></div>
-      <div class="kpi-live"><div class="lbl">WhatsApp</div><div class="val" id="kpi-whatsapp">0</div></div>
-      <div class="kpi-live"><div class="lbl">SMS</div><div class="val" id="kpi-sms">0</div></div>
-      <div class="kpi-live warn"><div class="lbl">Voice</div><div class="val" id="kpi-voice">0</div></div>
-      <div class="kpi-live good"><div class="lbl">Patient touchpts</div><div class="val" id="kpi-patient">0</div></div>
-      <div class="kpi-live"><div class="lbl">Staff alerts</div><div class="val" id="kpi-staff">0</div></div>
-      <div class="kpi-live critical"><div class="lbl">Escalations</div><div class="val" id="kpi-escalations">0</div></div>
-    </div>
-    <div class="progress-bar"><div class="fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="right-panel">
+      <div class="kpis-live">
+        <div class="kpi-live"><div class="lbl">Steps</div><div class="val" id="kpi-steps">0</div></div>
+        <div class="kpi-live good"><div class="lbl">Msgs sent</div><div class="val" id="kpi-messages">0</div></div>
+        <div class="kpi-live"><div class="lbl">WhatsApp</div><div class="val" id="kpi-whatsapp">0</div></div>
+        <div class="kpi-live"><div class="lbl">SMS</div><div class="val" id="kpi-sms">0</div></div>
+        <div class="kpi-live warn"><div class="lbl">Voice</div><div class="val" id="kpi-voice">0</div></div>
+        <div class="kpi-live good"><div class="lbl">Patient</div><div class="val" id="kpi-patient">0</div></div>
+        <div class="kpi-live"><div class="lbl">Staff</div><div class="val" id="kpi-staff">0</div></div>
+        <div class="kpi-live critical"><div class="lbl">Escalate</div><div class="val" id="kpi-escalations">0</div></div>
+      </div>
+      <div class="progress-bar"><div class="fill" id="progress-fill" style="width:0%"></div></div>
 
-    <h2 style="margin-top:18px">🎭 Current scene</h2>
-    <div id="current-scene" style="font-size:13px;line-height:1.5;color:var(--text);min-height:60px">
-      <span class="placeholder">Demo idle.</span>
-    </div>
+      <h2 style="margin-top:10px">🎭 Current scene</h2>
+      <div id="current-scene" style="font-size:11px;line-height:1.4;color:var(--text);min-height:36px">
+        <span class="placeholder">Demo idle.</span>
+      </div>
 
-    <h2 style="margin-top:18px">⚙ Agents fired this run</h2>
-    <div id="agents-fired" style="font-size:11px;color:var(--muted);line-height:1.6">—</div>
+      <h2 style="margin-top:10px">⚙ Agents fired</h2>
+      <div id="agents-fired" style="font-size:10px;color:var(--muted);line-height:1.4">—</div>
+    </div>
   </div>
 </div>
 
 <script>
-let demoSpeed = 'fast';
+let demoSpeed = '2min';
 let script = [];
 let messagePollInterval = null;
 let demoStartTime = 0;
+let ttsKeyConfigured = false;
+let demoStopped = false;
+let demoRunning = false;
+
+// Map step title → TTS persona + spoken line (so each step "voices" appropriately)
+function ttsPlanForStep(s) {
+  const t = s.title || '';
+  const desc = s.description || '';
+  // Maria narrates morning + outreach setup
+  if (/HIPAA Login|Front-Desk Hub|Morning Setup|Batch Campaign|Staff Notification|Live Response/i.test(t)) {
+    return { role: 'intake_agent', text: t + '. ' + desc.split('.')[0] };
+  }
+  if (/Outbound Voice Call/i.test(t)) {
+    return { role: 'intake_agent', text: 'Hi Abigail, this is Maria from Bright Smile Dental. I want to check in personally — we have not seen you in over a year. I know life gets busy. Could you give me a call back?' };
+  }
+  if (/Voicemail.*SMS|SMS Follow/i.test(t)) {
+    return { role: 'intake_agent', text: 'No answer. Leaving voicemail and sending SMS follow-up automatically.' };
+  }
+  if (/Inbound Call/i.test(t)) {
+    return { role: 'intake_agent', text: 'Thanks for calling Bright Smile Dental! May I have your phone number to look you up?' };
+  }
+  if (/Reason for Visit/i.test(t)) {
+    return { role: 'patient', text: 'I think I need a filling.' };
+  }
+  if (/270 request|Verification Loop Attempt 1/i.test(t)) {
+    return { role: 'insurance_agent', text: 'One moment — calling Delta Dental to verify your benefits...' };
+  }
+  if (/web-scrape fallback|Verification Loop Attempt 2/i.test(t)) {
+    return { role: 'insurance_agent', text: 'Carrier API timed out. Retrying with web portal scrape. Success — coverage confirmed.' };
+  }
+  if (/Cost Estimate/i.test(t)) {
+    return { role: 'cost_estimate_agent', text: 'Good news — your cleaning is covered one hundred percent. For the filling, your insurance pays one hundred sixty dollars and you pay ninety dollars after your fifty dollar deductible.' };
+  }
+  if (/Scheduling Proposal/i.test(t)) {
+    return { role: 'scheduling_agent', text: 'What works for you next week? I have Tuesday at nine A M available. We will need a fifty dollar deposit to hold the spot, refundable on arrival.' };
+  }
+  if (/Patient Confirmation SMS/i.test(t)) {
+    return { role: 'scheduling_agent', text: 'Sending confirmation text with appointment details and the deposit link now.' };
+  }
+  if (/WhatsApp to Doctor|Dr. Chen/i.test(t)) {
+    return { role: 'doctor', text: 'Doctor Chen, you have a new booking on Tuesday at nine A M for a filling. Patient is flagged as critical risk per the S P C engine.' };
+  }
+  if (/Patient WhatsApp|WhatsApp follow-up/i.test(t)) {
+    return { role: 'scheduling_agent', text: 'Following up on WhatsApp with map link, deposit link, and insurance card upload.' };
+  }
+  if (/Exception Detected|verification fails/i.test(t)) {
+    return { role: 'escalation', text: 'Verification failed. Eleanor Powell shows terminated coverage. This requires human follow-up.' };
+  }
+  if (/Human-in-the-loop|Staff.*Escalation/i.test(t)) {
+    return { role: 'escalation', text: 'Sending a WhatsApp to Maria with the full call script and one-tap resolve buttons.' };
+  }
+  if (/SPC Chart|Western Electric/i.test(t)) {
+    return { role: 'intake_agent', text: 'Top critical patient: Abigail Rogers. P bar is ninety six percent over twenty eight appointments. Western Electric Rules one, two, and three have all fired. Risk score one hundred percent.' };
+  }
+  if (/E-Signature|CFR Part 11/i.test(t)) {
+    return { role: 'doctor', text: 'Doctor Chen signing the treatment plan with two factor authentication. Signature is chain hashed to the previous signature for tamper evidence per Twenty One C F R Part Eleven section eleven point ten E.' };
+  }
+  if (/LLM Plain-English|Cost estimate translated/i.test(t)) {
+    return { role: 'cost_estimate_agent', text: 'Anthropic Opus four point eight translates the insurance breakdown into a warm two paragraph explanation for the patient.' };
+  }
+  if (/Multi-Language|Spanish/i.test(t)) {
+    return { role: 'patient', text: 'Hola María. Es hora de su limpieza dental. ¿Qué día le funciona?' };
+  }
+  if (/Consent Gate/i.test(t)) {
+    return { role: 'escalation', text: 'Patient has not opted in for S M S. Send blocked and logged. Remediation: obtain written e consent.' };
+  }
+  if (/Patient Self-Export|Right of access/i.test(t)) {
+    return { role: 'intake_agent', text: 'Patient requested their full record under H I P A A section one sixty four point five twenty four. Returning demographics, appointments, treatments, payments, and communications.' };
+  }
+  if (/End-of-Shift/i.test(t)) {
+    return { role: 'scheduling_agent', text: 'End of shift. Forty seven touchpoints sent. Nine appointments booked. Three no shows averted. Twelve hundred dollars in revenue protected.' };
+  }
+  return { role: 'default', text: t };
+}
+
+async function checkTtsKey() {
+  const r = await fetch('/v1/tts/voices').then(r=>r.json()).catch(()=>({configured:false}));
+  ttsKeyConfigured = !!r.configured;
+  if (!ttsKeyConfigured) {
+    document.getElementById('tts-enabled').checked = false;
+  }
+  return ttsKeyConfigured;
+}
+
+async function openTtsConfig() {
+  const key = prompt('Paste your ElevenLabs API key (xi_...):\n\nGet one at https://elevenlabs.io/app/settings/api-keys');
+  if (!key) return;
+  const r = await fetch('/v1/tts/key', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ key: key.trim() })
+  }).then(r=>r.json());
+  if (r.ok) {
+    alert('✓ ElevenLabs key stored. Voice TTS enabled.');
+    ttsKeyConfigured = true;
+    document.getElementById('tts-enabled').checked = true;
+  } else {
+    alert('Error: ' + (r.error || 'unknown'));
+  }
+}
+
+// Audio queue — so steps play sequentially without overlap
+const audioQueue = [];
+let audioPlaying = false;
+async function playTtsForStep(stepData) {
+  if (!ttsKeyConfigured || !document.getElementById('tts-enabled').checked) return;
+  const plan = ttsPlanForStep(stepData);
+  if (!plan.text || plan.text.length < 5) return;
+  try {
+    const resp = await fetch('/v1/tts', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ text: plan.text.slice(0, 600), role: plan.role })
+    });
+    if (!resp.ok) return;
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    audioQueue.push({ url, role: plan.role, persona: resp.headers.get('X-Voice-Persona') });
+    _drainAudioQueue();
+  } catch (e) { /* silent — voice is optional */ }
+}
+function _drainAudioQueue() {
+  if (audioPlaying || audioQueue.length === 0) return;
+  audioPlaying = true;
+  const { url, role, persona } = audioQueue.shift();
+  const audio = new Audio(url);
+  audio.volume = 0.9;
+  audio.onended = () => { audioPlaying = false; URL.revokeObjectURL(url); _drainAudioQueue(); };
+  audio.onerror = () => { audioPlaying = false; URL.revokeObjectURL(url); _drainAudioQueue(); };
+  audio.play().catch(() => { audioPlaying = false; });
+  // Show who's speaking
+  const indicator = document.getElementById('current-voice');
+  if (indicator) indicator.textContent = '🔊 ' + (persona || role || 'speaking');
+}
 
 async function init() {
   const r = await fetch('/v1/demo/script').then(r=>r.json());
   script = r.steps || [];
   renderTimeline();
+  await checkTtsKey();
+  if (!ttsKeyConfigured) {
+    document.getElementById('current-voice').textContent = '⚙ no TTS key';
+  } else {
+    document.getElementById('current-voice').textContent = '🔊 voice ready';
+  }
 }
 document.addEventListener('DOMContentLoaded', init);
 
@@ -204,7 +359,13 @@ function renderTimeline() {
 
 async function playDemo() {
   const btn = document.getElementById('play-btn');
+  const stopBtn = document.getElementById('stop-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  demoStopped = false;
+  demoRunning = true;
   btn.disabled = true; btn.textContent = '▶ Playing...';
+  stopBtn.disabled = false;
+  resetBtn.disabled = true;
   document.getElementById('demo-status').innerHTML = '<span class="badge running">running</span> speed=' + demoSpeed;
   document.getElementById('messages').innerHTML = '<div class="placeholder">Watching live message stream...</div>';
   demoStartTime = Date.now();
@@ -213,9 +374,14 @@ async function playDemo() {
   messagePollInterval = setInterval(updateMessages, 500);
 
   // Highlight steps as they progress (simulated since the API runs all steps server-side)
-  const stepDelay = demoSpeed === 'fast' ? 200 : demoSpeed === 'normal' ? 850 : 2500;
+  // 2min mode: divide 120s budget across the script (~5s/step for 24 steps)
+  const stepDelay = demoSpeed === 'fast'   ? 200
+                  : demoSpeed === '2min'   ? Math.floor(120000 / Math.max(1, script.length))
+                  : demoSpeed === 'normal' ? 850
+                                           : 2500;
   const highlightAnimation = (async () => {
     for (let i = 1; i <= script.length; i++) {
+      if (demoStopped) break;
       // Mark previous done
       if (i > 1) {
         const prev = document.getElementById('step-' + (i-1));
@@ -227,10 +393,12 @@ async function playDemo() {
       document.getElementById('progress-fill').style.width = (i / script.length * 100) + '%';
       const s = script.find(x => x.step === i);
       if (s) document.getElementById('current-scene').innerHTML = '<b>' + escapeHtml(s.title) + '</b><div style="font-size:11px;color:var(--muted);margin-top:4px">' + escapeHtml(s.scene) + '</div>';
+      // Fire TTS for this step's voiced line (async — runs in parallel with step delay)
+      if (s) playTtsForStep(s);
       await sleep(stepDelay);
     }
     const last = document.getElementById('step-' + script.length);
-    if (last) { last.classList.remove('active'); last.classList.add('done'); }
+    if (last && !demoStopped) { last.classList.remove('active'); last.classList.add('done'); }
   })();
 
   // Run the demo server-side
@@ -244,19 +412,41 @@ async function playDemo() {
   await updateMessages();
   computeAgents(r.results);
 
-  btn.disabled = false; btn.textContent = '▶ Play End-to-End Demo';
-  document.getElementById('demo-status').innerHTML = '<span class="badge complete">complete</span> ' + (r.steps_run || 0) + ' steps · ' + ((Date.now() - demoStartTime)/1000).toFixed(1) + 's elapsed';
-  document.getElementById('current-scene').innerHTML = '<b>✓ Demo complete</b><div style="font-size:11px;color:var(--muted);margin-top:4px">' + (r.steps_run||0) + ' steps ran end-to-end. Scroll left panel to review each.</div>';
+  demoRunning = false;
+  btn.disabled = false; btn.textContent = '▶ Play 2-Min Demo';
+  stopBtn.disabled = true;
+  resetBtn.disabled = false;
+  if (demoStopped) {
+    document.getElementById('demo-status').innerHTML = '<span class="badge" style="background:#fee2e2;color:#991b1b">stopped</span> at step ' + (document.getElementById('kpi-steps').textContent) + ' · ' + ((Date.now() - demoStartTime)/1000).toFixed(1) + 's';
+    document.getElementById('current-scene').innerHTML = '<b style="color:var(--bad)">■ Demo stopped</b><div style="font-size:10px;color:var(--muted);margin-top:2px">Click ↻ Reset to clear, or ▶ Play to restart.</div>';
+  } else {
+    document.getElementById('demo-status').innerHTML = '<span class="badge complete">complete</span> ' + (r.steps_run || 0) + ' steps · ' + ((Date.now() - demoStartTime)/1000).toFixed(1) + 's';
+    document.getElementById('current-scene').innerHTML = '<b>✓ Demo complete</b><div style="font-size:10px;color:var(--muted);margin-top:2px">' + (r.steps_run||0) + ' steps · review left panel.</div>';
+  }
+}
+
+function stopDemo() {
+  demoStopped = true;
+  // Drain audio queue immediately so voices don't keep playing
+  audioQueue.length = 0;
+  document.getElementById('stop-btn').disabled = true;
+  document.getElementById('demo-status').innerHTML = '<span class="badge" style="background:#fef3c7;color:#92400e">stopping…</span>';
 }
 
 function resetDemo() {
+  if (demoRunning) { stopDemo(); }
+  demoStopped = false;
   document.querySelectorAll('.step').forEach(s => { s.classList.remove('active','done','error'); });
   document.querySelectorAll('.kpi-live .val').forEach(v => v.textContent = '0');
   document.getElementById('progress-fill').style.width = '0%';
-  document.getElementById('messages').innerHTML = '<div class="placeholder">Click <b>Play</b> to start the demo.</div>';
+  document.getElementById('messages').innerHTML = '<div class="placeholder">Click <b>▶ Play 2-Min Demo</b> to start.</div>';
   document.getElementById('current-scene').innerHTML = '<span class="placeholder">Demo idle.</span>';
   document.getElementById('agents-fired').textContent = '—';
   document.getElementById('demo-status').textContent = '';
+  document.getElementById('play-btn').disabled = false;
+  document.getElementById('play-btn').textContent = '▶ Play 2-Min Demo';
+  document.getElementById('stop-btn').disabled = true;
+  document.getElementById('reset-btn').disabled = false;
 }
 
 async function updateMessages() {

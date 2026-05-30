@@ -352,6 +352,38 @@ const server = http.createServer(async (req, res) => {
   }
 
   // ──────────────────────────────────────────────────────────────────
+  // ELEVENLABS TTS — voice for the demo
+  // ──────────────────────────────────────────────────────────────────
+  if (u.pathname === '/v1/tts' && req.method === 'POST') {
+    try {
+      let body; try { body = await readBody(req); } catch (_) { body = {}; }
+      const tts = require('./lib/ttsElevenLabs.cjs');
+      if (!tts.getApiKey()) return send(res, 503, { error: 'elevenlabs_key_missing', message: 'POST /v1/tts/key with {key:"..."} to configure.' });
+      const result = await tts.synthesize(body.text || '', { role: body.role, voice_id: body.voice_id });
+      res.writeHead(200, {
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': result.mp3.length,
+        'X-Voice-Persona': result.persona,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Expose-Headers': 'X-Voice-Persona'
+      });
+      res.end(result.mp3);
+      return;
+    } catch (e) { return send(res, 500, { error: 'tts_failed', detail: e.message }); }
+  }
+  if (u.pathname === '/v1/tts/voices' && req.method === 'GET') {
+    const tts = require('./lib/ttsElevenLabs.cjs');
+    return send(res, 200, { configured: !!tts.getApiKey(), personas: tts.listPersonas() });
+  }
+  if (u.pathname === '/v1/tts/key' && req.method === 'POST') {
+    let body; try { body = await readBody(req); } catch (_) { body = {}; }
+    if (!body.key) return send(res, 400, { error: 'key_required' });
+    const tts = require('./lib/ttsElevenLabs.cjs');
+    tts.setApiKey(body.key);
+    return send(res, 200, { ok: true, message: 'ElevenLabs key stored in clinic.db::meta.config' });
+  }
+
+  // ──────────────────────────────────────────────────────────────────
   // DEMO RUNNER — scripted end-to-end demo
   // ──────────────────────────────────────────────────────────────────
   if (u.pathname === '/v1/demo/script' && req.method === 'GET') {
