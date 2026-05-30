@@ -1,0 +1,27 @@
+# Node
+node_modules/
+
+# Databases (regenerated on first run via `node generateClinicData.cjs` + `node db.cjs`)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Temp dirs created at runtime
+data/
+_tmp/
+*.log
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Secrets
+.env
+.env.local
+*.key
+*.pem

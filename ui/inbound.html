@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Inbound Call Simulator</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b;
+    --accent: #0ea5e9; --good: #16a34a; --bad: #dc2626; --warn: #d97706;
+    --shade: #f1f5f9;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.04);
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:0; background: var(--bg); color: var(--text); font: 14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; }
+  header { background: linear-gradient(135deg,#06b6d4 0%,#0284c7 100%); color:white; padding: 18px 24px; display:flex; justify-content:space-between; align-items:center; }
+  header h1 { margin:0; font-size:20px; font-weight:700; }
+  header .sub { font-size:12px; opacity:0.88; margin-top:3px; }
+  header nav a { color:white; text-decoration:none; padding:6px 12px; border-radius:6px; margin-left:6px; font-size:12px; opacity:0.85; }
+  header nav a:hover { background: rgba(255,255,255,0.15); opacity:1; }
+  header nav a.active { background: rgba(255,255,255,0.22); font-weight:700; opacity:1; }
+
+  .layout { display:grid; grid-template-columns: 1fr 460px; gap:18px; padding:18px; max-width:1500px; margin:0 auto; }
+  .card { background:var(--card); border-radius:10px; padding:18px; box-shadow:var(--shadow-card); margin-bottom:14px; }
+  .card h2 { margin:0 0 14px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; }
+
+  .start-form { display:flex; gap:8px; align-items:flex-end; }
+  .start-form > div { flex:1; }
+  label { display:block; font-size:11px; color:var(--muted); margin-bottom:4px; font-weight:600; }
+  input, select { width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px; font: inherit; }
+  button.primary { background:var(--accent); color:white; border:0; border-radius:6px; padding:9px 16px; font-weight:600; cursor:pointer; }
+  button.primary:hover { background:#0284c7; }
+  button.ghost { background:transparent; color:var(--accent); border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; cursor:pointer; font-weight:600; }
+
+  /* Transcript */
+  .transcript { max-height: 600px; overflow-y: auto; padding-right: 4px; }
+  .turn { padding: 10px 0; display: flex; gap: 12px; }
+  .turn .avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; color: white; font-size: 13px;
+  }
+  .turn.agent .avatar { background: var(--accent); }
+  .turn.agent.intake_agent .avatar { background: #06b6d4; }
+  .turn.agent.insurance_agent .avatar { background: #f97316; }
+  .turn.agent.cost_estimate_agent .avatar { background: #16a34a; }
+  .turn.agent.scheduling_agent .avatar { background: #8b5cf6; }
+  .turn.agent.escalation .avatar { background: var(--bad); }
+  .turn.patient .avatar { background: var(--muted); }
+  .turn .body { flex: 1; }
+  .turn .who { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .turn .text { font-size: 14px; line-height: 1.5; white-space: pre-wrap; margin-top: 2px; }
+  .turn.patient .text { background: var(--shade); padding: 8px 12px; border-radius: 8px; display: inline-block; }
+
+  .input-bar { display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .input-bar input { flex: 1; }
+
+  /* State panel */
+  .state-step {
+    display: flex; align-items: center; gap: 10px; padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .state-step:last-child { border: 0; }
+  .state-step .dot {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 11px; background: var(--shade); color: var(--muted);
+  }
+  .state-step.done .dot { background: var(--good); color: white; }
+  .state-step.active .dot { background: var(--accent); color: white; animation: pulse 1s ease-in-out infinite; }
+  .state-step.escalated .dot { background: var(--bad); color: white; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+  .state-step .body { flex: 1; }
+  .state-step .name { font-size: 13px; font-weight: 600; }
+  .state-step .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .session-data {
+    background: var(--shade); border-radius: 8px; padding: 12px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px;
+    max-height: 300px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+  }
+
+  .quick-pick { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .quick-pick button {
+    background: var(--shade); color: var(--text); border: 0; border-radius: 4px;
+    padding: 4px 10px; font-size: 11px; cursor: pointer; font-weight: 600;
+  }
+  .quick-pick button:hover { background: #e2e8f0; }
+
+  .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; }
+  .badge.existing { background:#dcfce7; color:#166534; }
+  .badge.new { background:#dbeafe; color:#1e40af; }
+  .badge.completed { background:#dcfce7; color:#166534; }
+  .badge.escalated { background:#fee2e2; color:#991b1b; }
+  .badge.active { background:#fef3c7; color:#92400e; }
+
+  .demo-presets { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .demo-presets button { background:var(--shade); border:0; border-radius:4px; padding:5px 10px; font-size:11px; cursor:pointer; font-weight:600; }
+  .demo-presets button:hover { background:#e2e8f0; }
+
+  .placeholder { color:var(--muted); padding:30px 0; text-align:center; font-style:italic; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>📞 Inbound Call Simulator</h1>
+    <div class="sub">Multi-agent orchestration · Intake → Insurance → Cost Estimate → Scheduling → Confirmation</div>
+  </div>
+  <nav>
+    <a href="/">Hub</a>
+    <a href="/verifier">Verifier</a>
+    <a href="/clinic">Scheduler</a>
+    <a href="/inbound" class="active">Inbound Call</a>
+  </nav>
+</header>
+
+<div class="layout">
+  <!-- LEFT: live transcript + start form -->
+  <div>
+    <div class="card" id="start-card">
+      <h2>1 · Start an inbound call</h2>
+      <div class="start-form">
+        <div>
+          <label>Caller phone (for PMS lookup)</label>
+          <input type="text" id="caller-phone" placeholder="+15348147010 (existing patient) or any new number" />
+        </div>
+        <button class="primary" onclick="startCall()">Start call</button>
+      </div>
+      <div class="demo-presets">
+        <span style="font-size:11px;color:var(--muted);align-self:center;margin-right:4px">Demo presets:</span>
+        <button onclick="document.getElementById('caller-phone').value='+15348147010';">Existing chronic-risk</button>
+        <button onclick="document.getElementById('caller-phone').value='+15553011234';">New patient</button>
+        <button onclick="loadRandomExisting()">Random existing</button>
+      </div>
+    </div>
+
+    <div class="card" id="transcript-card" style="display:none">
+      <h2>📜 Conversation transcript <span id="session-status"></span></h2>
+      <div class="transcript" id="transcript"></div>
+      <div class="input-bar" id="input-bar" style="display:none">
+        <input type="text" id="patient-input" placeholder="Patient's response..." onkeydown="if(event.key==='Enter')sendTurn()" />
+        <button class="primary" onclick="sendTurn()">Send</button>
+      </div>
+      <div class="quick-pick" id="quick-pick"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: state panel -->
+  <div>
+    <div class="card">
+      <h2>🤖 Agent state</h2>
+      <div id="states">
+        <div class="placeholder">Start a call to see agent handoffs.</div>
+      </div>
+    </div>
+
+    <div class="card" id="data-card" style="display:none">
+      <h2>📊 Session data</h2>
+      <pre class="session-data" id="session-data"></pre>
+    </div>
+
+    <div class="card" id="confirmation-card" style="display:none">
+      <h2>✉️ Outbound confirmation</h2>
+      <div id="confirmation-body"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentSession = null;
+const AGENT_STEPS = [
+  { state: 'TRIAGE', name: 'Triage', meta: 'PMS lookup · new vs existing' },
+  { state: 'INTAKE', name: 'Intake Agent', meta: 'Collect name · DOB · insurance', match: ['INTAKE_NEW_NAME','INTAKE_NEW_DOB','INTAKE_NEW_INSURANCE','EXISTING_REASON'] },
+  { state: 'INSURANCE_VERIFICATION', name: 'Insurance Agent', meta: '270 request / web / voice call', match: ['INSURANCE_VERIFICATION'] },
+  { state: 'COST_ESTIMATE', name: 'Cost Estimate Agent', meta: 'Treatment plan + benefits → OOP', match: ['COST_ESTIMATE','COST_ESTIMATE_SELF_PAY'] },
+  { state: 'SCHEDULING', name: 'Scheduling Agent', meta: 'SPC-driven slot policy', match: ['SCHEDULING'] },
+  { state: 'CONFIRMATION', name: 'Confirmation', meta: 'Text + cost-estimate sent', match: ['CONFIRMATION'] },
+];
+
+async function startCall() {
+  const phone = document.getElementById('caller-phone').value.trim();
+  if (!phone) { alert('Enter a phone number first'); return; }
+  const r = await fetch('/v1/intake/inbound', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ caller_phone: phone })
+  }).then(r => r.json());
+  if (r.error) { alert('Error: ' + r.error + '\n' + (r.detail || '')); return; }
+  currentSession = r;
+  document.getElementById('transcript-card').style.display = 'block';
+  document.getElementById('data-card').style.display = 'block';
+  document.getElementById('input-bar').style.display = 'flex';
+  renderAll();
+  document.getElementById('patient-input').focus();
+}
+
+async function sendTurn() {
+  const text = document.getElementById('patient-input').value.trim();
+  if (!text) return;
+  document.getElementById('patient-input').value = '';
+  const r = await fetch('/v1/intake/turn', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ session_id: currentSession.session_id, response: { text } })
+  }).then(r => r.json());
+  if (r.error) { alert('Error: ' + r.error + '\n' + (r.detail || '')); return; }
+  currentSession = r;
+  renderAll();
+}
+
+function renderAll() {
+  renderTranscript();
+  renderStates();
+  renderSessionData();
+  renderConfirmation();
+  renderQuickPicks();
+  renderStatus();
+}
+
+function renderTranscript() {
+  const div = document.getElementById('transcript');
+  div.innerHTML = currentSession.transcript.map(t => {
+    if (t.who === 'agent') {
+      const initial = (t.agent || 'AI').split('_').map(s => s[0]).join('').toUpperCase().slice(0,2);
+      return '<div class="turn agent ' + (t.agent || '') + '">' +
+        '<div class="avatar">' + initial + '</div>' +
+        '<div class="body"><div class="who">' + (t.agent || 'agent').replace(/_/g, ' ') + '</div>' +
+        '<div class="text">' + escapeHtml(t.text) + '</div></div></div>';
+    }
+    return '<div class="turn patient"><div class="avatar">PT</div><div class="body"><div class="who">patient</div><div class="text">' + escapeHtml(t.text) + '</div></div></div>';
+  }).join('');
+  div.scrollTop = div.scrollHeight;
+}
+
+function renderStates() {
+  const out = document.getElementById('states');
+  const sessionState = currentSession.state;
+  // Determine which step is active
+  const stepCompleted = [];
+  const order = ['TRIAGE','INTAKE_NEW_NAME','INTAKE_NEW_DOB','INTAKE_NEW_INSURANCE','EXISTING_REASON','INSURANCE_VERIFICATION','COST_ESTIMATE','COST_ESTIMATE_SELF_PAY','SCHEDULING','CONFIRMATION','HUMAN_ESCALATION_VERIFICATION','HUMAN_ESCALATION_DECLINE'];
+  const sessionStateIdx = order.indexOf(sessionState);
+  const isEscalated = sessionState && sessionState.startsWith('HUMAN_ESCALATION');
+  out.innerHTML = AGENT_STEPS.map((step, i) => {
+    let cls = '';
+    let dotContent = String(i + 1);
+    const matches = step.match || [step.state];
+    if (matches.includes(sessionState)) {
+      cls = 'active'; dotContent = '●';
+    } else {
+      // Check if we passed this step (any of its states appear before in order)
+      const passed = matches.some(m => order.indexOf(m) < sessionStateIdx);
+      if (passed) { cls = 'done'; dotContent = '✓'; }
+    }
+    return '<div class="state-step ' + cls + '">' +
+      '<span class="dot">' + dotContent + '</span>' +
+      '<div class="body"><div class="name">' + step.name + '</div><div class="meta">' + step.meta + '</div></div>' +
+      '</div>';
+  }).join('') + (isEscalated ?
+    '<div class="state-step escalated"><span class="dot">!</span><div class="body"><div class="name">Human escalation</div><div class="meta">Reason: ' + (currentSession.escalation || 'unknown') + '</div></div></div>' : '');
+}
+
+function renderSessionData() {
+  const compact = {
+    session_id: currentSession.session_id,
+    patient_status: currentSession.patient_status,
+    state: currentSession.state,
+    completed: currentSession.completed,
+    escalation: currentSession.escalation,
+    session_data: Object.fromEntries(
+      Object.entries(currentSession.session_data || {}).map(([k, v]) => {
+        if (k === 'verify_result' && v) return [k, { coverage_status: v.coverage_status, totals: v.totals, lines_count: v.lines.length, exceptions_count: (v.exceptions||[]).length }];
+        if (k === 'eligibility_record' && v) return [k, { patient: v.patient?.first_name + ' ' + v.patient?.last_name, payer: v.payer?.name }];
+        if (k === 'pms_record' && v) return [k, { patient_id: v.patient_id, name: v.first_name + ' ' + v.last_name, archetype: v.risk_archetype }];
+        if (k === 'spc' && v) return [k, { p_bar: v.p_bar, risk_band: v.risk?.band, we_rules: v.we_rules_triggered?.length }];
+        return [k, v];
+      })
+    )
+  };
+  document.getElementById('session-data').textContent = JSON.stringify(compact, null, 2);
+}
+
+function renderConfirmation() {
+  if (currentSession.session_data?.confirmation_sms) {
+    document.getElementById('confirmation-card').style.display = 'block';
+    document.getElementById('confirmation-body').innerHTML =
+      '<div style="font-size:11px;color:var(--muted);margin-bottom:8px"><b>SMS to ' + (currentSession.session_data.preferred_channel ? 'preferred channel: ' + currentSession.session_data.preferred_channel : 'patient') + '</b></div>' +
+      '<div style="background:#ecfeff;padding:12px;border-radius:8px;border-left:4px solid #06b6d4;font-size:13px;white-space:pre-wrap">' + escapeHtml(currentSession.session_data.confirmation_sms) + '</div>';
+  } else {
+    document.getElementById('confirmation-card').style.display = 'none';
+  }
+}
+
+function renderQuickPicks() {
+  const pick = document.getElementById('quick-pick');
+  if (currentSession.completed) { pick.innerHTML = ''; document.getElementById('input-bar').style.display = 'none'; return; }
+  // Provide suggested responses based on the state
+  let suggestions = [];
+  const lastAgent = (currentSession.transcript || []).filter(t => t.who === 'agent').slice(-1)[0];
+  const text = lastAgent?.text || '';
+  if (/phone number/i.test(text)) suggestions = ['+15348147010', '+15552223344'];
+  else if (/full name/i.test(text)) suggestions = ['Alex Carter', 'Jordan Smith'];
+  else if (/date of birth/i.test(text)) suggestions = ['1989-03-12', '1975-08-22'];
+  else if (/dental insurance/i.test(text)) suggestions = ['DDX448120731 Delta Dental', 'no, self-pay', 'MET33019887 MetLife'];
+  else if (/brings you in/i.test(text)) suggestions = ['cleaning', 'crown', 'root canal', 'emergency'];
+  else if (/what works for you/i.test(text)) suggestions = ['Tuesday morning works', 'Yes that works', 'no thanks, too expensive'];
+  else if (/insurance is covered/i.test(text) || /Self-pay estimate/i.test(text)) suggestions = ['ok', 'sounds good'];
+  pick.innerHTML = suggestions.map(s => '<button onclick="document.getElementById(\'patient-input\').value=' + JSON.stringify(s) + ';sendTurn();">' + escapeHtml(s) + '</button>').join('');
+}
+
+function renderStatus() {
+  const s = document.getElementById('session-status');
+  if (currentSession.completed) {
+    s.innerHTML = currentSession.escalation
+      ? '<span class="badge escalated">escalated · ' + currentSession.escalation + '</span>'
+      : '<span class="badge completed">✓ completed</span>';
+  } else {
+    s.innerHTML = (currentSession.patient_status === 'existing' ? '<span class="badge existing">existing patient</span>' : (currentSession.patient_status === 'new' ? '<span class="badge new">new patient</span>' : '')) +
+      ' <span class="badge active">in progress · ' + currentSession.transcript.length + ' turns</span>';
+  }
+}
+
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function loadRandomExisting() {
+  const r = await fetch('/v1/clinic/patients?limit=5').then(r => r.json());
+  if (r.patients && r.patients.length > 0) {
+    const p = r.patients[Math.floor(Math.random() * r.patients.length)];
+    const full = await fetch('/v1/clinic/patients/' + p.patient_id).then(r => r.json());
+    if (full.patient && full.patient.phone) document.getElementById('caller-phone').value = full.patient.phone;
+  }
+}
+</script>
+</body>
+</html>

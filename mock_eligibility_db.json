@@ -1,0 +1,1562 @@
+{
+  "_meta": {
+    "description": "Mock dental eligibility & benefits database for development. All patients and member data are fabricated.",
+    "generated_for": "development_only",
+    "as_of_date": "2026-05-30",
+    "plan_year": 2026,
+    "record_count": 10,
+    "schema_version": "1.0",
+    "scenarios": [
+      "PT-0001 active PPO, deductible unmet, full annual max",
+      "PT-0002 active PPO, deductible met, annual max nearly exhausted",
+      "PT-0003 active PPO, in waiting period for basic & major",
+      "PT-0004 dependent child, ortho with age + lifetime max",
+      "PT-0005 terminated coverage / self-pay",
+      "PT-0006 active with coordination of benefits (primary+secondary)",
+      "PT-0007 DHMO copay-schedule plan (no percentages, no annual max)",
+      "PT-0008 active with missing tooth clause excluding bridge/implant",
+      "PT-0009 out-of-network indemnity, UCR reimbursement",
+      "PT-0010 active, frequency-limited (recent cleaning, future eligibility)"
+    ]
+  },
+  "patients": [
+    {
+      "verification": {
+        "reference_number": "VR-2026-100001",
+        "verified_at": "2026-05-30T09:14:00Z",
+        "source": "payer_portal",
+        "status": "completed",
+        "data_completeness": "full_breakdown"
+      },
+      "patient": {
+        "patient_id": "PT-0001",
+        "first_name": "Marcus",
+        "last_name": "Halloway",
+        "date_of_birth": "1989-03-12",
+        "member_id": "DDX448120731",
+        "relationship_to_subscriber": "self"
+      },
+      "subscriber": {
+        "first_name": "Marcus",
+        "last_name": "Halloway",
+        "member_id": "DDX448120731",
+        "date_of_birth": "1989-03-12"
+      },
+      "payer": {
+        "name": "Delta Dental",
+        "payer_id": "DDCA",
+        "plan_name": "Delta Dental PPO",
+        "plan_type": "PPO",
+        "group_number": "GRP-77120",
+        "group_name": "Brightwave Labs Inc."
+      },
+      "coverage": {
+        "status": "active",
+        "effective_date": "2024-01-01",
+        "termination_date": null,
+        "in_network": true,
+        "plan_year_start": "2026-01-01",
+        "plan_year_end": "2026-12-31"
+      },
+      "plan_maximums": {
+        "annual_maximum": 2000.0,
+        "annual_used": 0.0,
+        "annual_remaining": 2000.0,
+        "lifetime_orthodontic_maximum": null,
+        "orthodontic_used": null
+      },
+      "deductibles": {
+        "individual_annual": 50.0,
+        "individual_met": 0.0,
+        "individual_remaining": 50.0,
+        "family_annual": 150.0,
+        "family_met": 0.0,
+        "applies_to_categories": [
+          "basic",
+          "major"
+        ],
+        "waived_for_categories": [
+          "diagnostic",
+          "preventive"
+        ]
+      },
+      "coverage_by_category": {
+        "diagnostic": {
+          "in_network_percent": 100,
+          "out_network_percent": 100
+        },
+        "preventive": {
+          "in_network_percent": 100,
+          "out_network_percent": 100
+        },
+        "basic": {
+          "in_network_percent": 80,
+          "out_network_percent": 60
+        },
+        "major": {
+          "in_network_percent": 50,
+          "out_network_percent": 40
+        }
+      },
+      "procedure_benefits": [
+        {
+          "ada_code": "D0120",
+          "description": "Periodic oral evaluation",
+          "category": "diagnostic",
+          "coverage_percent": 100,
+          "frequency": "2 per benefit year",
+          "frequency_remaining": 2,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D1110",
+          "description": "Prophylaxis - adult",
+          "category": "preventive",
+          "coverage_percent": 100,
+          "frequency": "2 per benefit year",
+          "frequency_remaining": 2,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D0274",
+          "description": "Bitewings - four films",
+          "category": "diagnostic",
+          "coverage_percent": 100,
+          "frequency": "1 per benefit year",
+          "frequency_remaining": 1,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D2391",
+          "description": "Resin composite - one surface, posterior",
+          "category": "basic",
+          "coverage_percent": 80,
+          "frequency": "Once per tooth surface per 24 mo",
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D2750",
+          "description": "Crown - porcelain fused to high noble metal",
+          "category": "major",
+          "coverage_percent": 50,
+          "frequency": "1 per tooth per 5 years",
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": "Downgraded to D2751 (PFM base metal) for posterior teeth",
+          "requires_preauth": true,
+          "notes": null
+        },
+        {
+          "ada_code": "D7140",
+          "description": "Extraction, erupted tooth",
+          "category": "basic",
+          "coverage_percent": 80,
+          "frequency": null,
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        }
+      ],
+      "limitations": {
+        "missing_tooth_clause": false,
+        "waiting_periods": [],
+        "age_limits": [],
+        "downgrades": [
+          "Posterior crowns downgraded to base metal"
+        ]
+      },
+      "coordination_of_benefits": {
+        "has_other_coverage": false
+      },
+      "claim_history": [],
+      "disclaimers": [
+        "Benefit quote is not a guarantee of payment. Final benefits are determined at claim adjudication."
+      ]
+    },
+    {
+      "verification": {
+        "reference_number": "VR-2026-100002",
+        "verified_at": "2026-05-30T09:14:00Z",
+        "source": "payer_portal",
+        "status": "completed",
+        "data_completeness": "full_breakdown"
+      },
+      "patient": {
+        "patient_id": "PT-0002",
+        "first_name": "Sofia",
+        "last_name": "Renteria",
+        "date_of_birth": "1976-11-02",
+        "member_id": "CIG90233117",
+        "relationship_to_subscriber": "self"
+      },
+      "subscriber": {
+        "first_name": "Sofia",
+        "last_name": "Renteria",
+        "member_id": "CIG90233117",
+        "date_of_birth": "1976-11-02"
+      },
+      "payer": {
+        "name": "Cigna",
+        "payer_id": "CIGNA",
+        "plan_name": "Cigna Dental Care PPO",
+        "plan_type": "PPO",
+        "group_number": "GRP-30418",
+        "group_name": "Northpoint Logistics"
+      },
+      "coverage": {
+        "status": "active",
+        "effective_date": "2019-07-01",
+        "termination_date": null,
+        "in_network": true,
+        "plan_year_start": "2026-01-01",
+        "plan_year_end": "2026-12-31"
+      },
+      "plan_maximums": {
+        "annual_maximum": 1500.0,
+        "annual_used": 1340.0,
+        "annual_remaining": 160.0,
+        "lifetime_orthodontic_maximum": null,
+        "orthodontic_used": null
+      },
+      "deductibles": {
+        "individual_annual": 50.0,
+        "individual_met": 50.0,
+        "individual_remaining": 0.0,
+        "family_annual": 150.0,
+        "family_met": 110.0,
+        "applies_to_categories": [
+          "basic",
+          "major"
+        ],
+        "waived_for_categories": [
+          "diagnostic",
+          "preventive"
+        ]
+      },
+      "coverage_by_category": {
+        "diagnostic": {
+          "in_network_percent": 100,
+          "out_network_percent": 80
+        },
+        "preventive": {
+          "in_network_percent": 100,
+          "out_network_percent": 80
+        },
+        "basic": {
+          "in_network_percent": 80,
+          "out_network_percent": 50
+        },
+        "major": {
+          "in_network_percent": 50,
+          "out_network_percent": 30
+        }
+      },
+      "procedure_benefits": [
+        {
+          "ada_code": "D0120",
+          "description": "Periodic oral evaluation",
+          "category": "diagnostic",
+          "coverage_percent": 100,
+          "frequency": "2 per benefit year",
+          "frequency_remaining": 0,
+          "last_paid_date": "2026-04-18",
+          "next_eligible_date": "2026-10-18",
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": "Frequency exhausted for the year"
+        },
+        {
+          "ada_code": "D1110",
+          "description": "Prophylaxis - adult",
+          "category": "preventive",
+          "coverage_percent": 100,
+          "frequency": "2 per benefit year",
+          "frequency_remaining": 0,
+          "last_paid_date": "2026-04-18",
+          "next_eligible_date": "2026-10-18",
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D4341",
+          "description": "Perio scaling & root planing - per quadrant",
+          "category": "basic",
+          "coverage_percent": 80,
+          "frequency": "1 per quadrant per 24 mo",
+          "frequency_remaining": 4,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D2750",
+          "description": "Crown - porcelain fused to high noble metal",
+          "category": "major",
+          "coverage_percent": 50,
+          "frequency": "1 per tooth per 5 years",
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": true,
+          "notes": "Only $160 of annual max remains; balance is patient responsibility"
+        }
+      ],
+      "limitations": {
+        "missing_tooth_clause": false,
+        "waiting_periods": [],
+        "age_limits": [],
+        "downgrades": []
+      },
+      "coordination_of_benefits": {
+        "has_other_coverage": false
+      },
+      "claim_history": [
+        {
+          "date": "2026-04-18",
+          "ada_code": "D1110",
+          "description": "Adult prophy",
+          "tooth": null,
+          "paid_amount": 95.0
+        },
+        {
+          "date": "2026-04-18",
+          "ada_code": "D0120",
+          "description": "Periodic exam",
+          "tooth": null,
+          "paid_amount": 38.0
+        },
+        {
+          "date": "2026-02-09",
+          "ada_code": "D2750",
+          "description": "Crown",
+          "tooth": "19",
+          "paid_amount": 620.0
+        },
+        {
+          "date": "2026-01-22",
+          "ada_code": "D3310",
+          "description": "RCT anterior",
+          "tooth": "8",
+          "paid_amount": 587.0
+        }
+      ],
+      "disclaimers": [
+        "Benefit quote is not a guarantee of payment. Final benefits are determined at claim adjudication."
+      ]
+    },
+    {
+      "verification": {
+        "reference_number": "VR-2026-100003",
+        "verified_at": "2026-05-30T09:14:00Z",
+        "source": "payer_portal",
+        "status": "completed",
+        "data_completeness": "full_breakdown"
+      },
+      "patient": {
+        "patient_id": "PT-0003",
+        "first_name": "Priya",
+        "last_name": "Nandakumar",
+        "date_of_birth": "1995-06-28",
+        "member_id": "MET55810042",
+        "relationship_to_subscriber": "self"
+      },
+      "subscriber": {
+        "first_name": "Priya",
+        "last_name": "Nandakumar",
+        "member_id": "MET55810042",
+        "date_of_birth": "1995-06-28"
+      },
+      "payer": {
+        "name": "MetLife",
+        "payer_id": "METLIFE",
+        "plan_name": "MetLife Dental PPO",
+        "plan_type": "PPO",
+        "group_number": "GRP-11902",
+        "group_name": "Cedar & Co."
+      },
+      "coverage": {
+        "status": "active",
+        "effective_date": "2026-02-01",
+        "termination_date": null,
+        "in_network": true,
+        "plan_year_start": "2026-01-01",
+        "plan_year_end": "2026-12-31"
+      },
+      "plan_maximums": {
+        "annual_maximum": 1500.0,
+        "annual_used": 47.0,
+        "annual_remaining": 1453.0,
+        "lifetime_orthodontic_maximum": null,
+        "orthodontic_used": null
+      },
+      "deductibles": {
+        "individual_annual": 75.0,
+        "individual_met": 0.0,
+        "individual_remaining": 75.0,
+        "family_annual": 225.0,
+        "family_met": 0.0,
+        "applies_to_categories": [
+          "basic",
+          "major"
+        ],
+        "waived_for_categories": [
+          "diagnostic",
+          "preventive"
+        ]
+      },
+      "coverage_by_category": {
+        "diagnostic": {
+          "in_network_percent": 100,
+          "out_network_percent": 90
+        },
+        "preventive": {
+          "in_network_percent": 100,
+          "out_network_percent": 90
+        },
+        "basic": {
+          "in_network_percent": 80,
+          "out_network_percent": 60
+        },
+        "major": {
+          "in_network_percent": 50,
+          "out_network_percent": 50
+        }
+      },
+      "procedure_benefits": [
+        {
+          "ada_code": "D0150",
+          "description": "Comprehensive oral evaluation",
+          "category": "diagnostic",
+          "coverage_percent": 100,
+          "frequency": "1 per 36 mo",
+          "frequency_remaining": 1,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D1110",
+          "description": "Prophylaxis - adult",
+          "category": "preventive",
+          "coverage_percent": 100,
+          "frequency": "2 per benefit year",
+          "frequency_remaining": 2,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D2391",
+          "description": "Resin composite - one surface, posterior",
+          "category": "basic",
+          "coverage_percent": 80,
+          "frequency": null,
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 6,
+          "waiting_period_met": false,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": "Basic services subject to 6-month waiting period; eligible 2026-08-01"
+        },
+        {
+          "ada_code": "D2750",
+          "description": "Crown - porcelain fused to high noble metal",
+          "category": "major",
+          "coverage_percent": 50,
+          "frequency": null,
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 12,
+          "waiting_period_met": false,
+          "alternate_benefit": null,
+          "requires_preauth": true,
+          "notes": "Major services subject to 12-month waiting period; eligible 2027-02-01"
+        }
+      ],
+      "limitations": {
+        "missing_tooth_clause": true,
+        "waiting_periods": [
+          {
+            "category": "basic",
+            "months": 6,
+            "eligible_date": "2026-08-01"
+          },
+          {
+            "category": "major",
+            "months": 12,
+            "eligible_date": "2027-02-01"
+          }
+        ],
+        "age_limits": [],
+        "downgrades": []
+      },
+      "coordination_of_benefits": {
+        "has_other_coverage": false
+      },
+      "claim_history": [],
+      "disclaimers": [
+        "Benefit quote is not a guarantee of payment. Final benefits are determined at claim adjudication."
+      ]
+    },
+    {
+      "verification": {
+        "reference_number": "VR-2026-100004",
+        "verified_at": "2026-05-30T09:14:00Z",
+        "source": "payer_portal",
+        "status": "completed",
+        "data_completeness": "full_breakdown"
+      },
+      "patient": {
+        "patient_id": "PT-0004",
+        "first_name": "Liam",
+        "last_name": "Okafor",
+        "date_of_birth": "2012-09-15",
+        "member_id": "AET22094510-02",
+        "relationship_to_subscriber": "child"
+      },
+      "subscriber": {
+        "first_name": "Adaeze",
+        "last_name": "Okafor",
+        "member_id": "AET22094510-01",
+        "date_of_birth": "1984-01-30"
+      },
+      "payer": {
+        "name": "Aetna",
+        "payer_id": "AETNA",
+        "plan_name": "Aetna Dental PPO + Ortho",
+        "plan_type": "PPO",
+        "group_number": "GRP-66201",
+        "group_name": "Halcyon Schools District"
+      },
+      "coverage": {
+        "status": "active",
+        "effective_date": "2022-09-01",
+        "termination_date": null,
+        "in_network": true,
+        "plan_year_start": "2026-01-01",
+        "plan_year_end": "2026-12-31"
+      },
+      "plan_maximums": {
+        "annual_maximum": 1500.0,
+        "annual_used": 210.0,
+        "annual_remaining": 1290.0,
+        "lifetime_orthodontic_maximum": 1500.0,
+        "orthodontic_used": 0.0
+      },
+      "deductibles": {
+        "individual_annual": 50.0,
+        "individual_met": 50.0,
+        "individual_remaining": 0.0,
+        "family_annual": 150.0,
+        "family_met": 150.0,
+        "applies_to_categories": [
+          "basic",
+          "major"
+        ],
+        "waived_for_categories": [
+          "diagnostic",
+          "preventive",
+          "orthodontics"
+        ]
+      },
+      "coverage_by_category": {
+        "diagnostic": {
+          "in_network_percent": 100,
+          "out_network_percent": 100
+        },
+        "preventive": {
+          "in_network_percent": 100,
+          "out_network_percent": 100
+        },
+        "basic": {
+          "in_network_percent": 80,
+          "out_network_percent": 60
+        },
+        "major": {
+          "in_network_percent": 50,
+          "out_network_percent": 50
+        },
+        "orthodontics": {
+          "in_network_percent": 50,
+          "out_network_percent": 50
+        }
+      },
+      "procedure_benefits": [
+        {
+          "ada_code": "D1120",
+          "description": "Prophylaxis - child",
+          "category": "preventive",
+          "coverage_percent": 100,
+          "frequency": "2 per benefit year",
+          "frequency_remaining": 1,
+          "last_paid_date": "2026-02-14",
+          "next_eligible_date": "2026-08-14",
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D1206",
+          "description": "Topical fluoride varnish",
+          "category": "preventive",
+          "coverage_percent": 100,
+          "frequency": "2 per benefit year",
+          "frequency_remaining": 1,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": "Through age 18",
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D1351",
+          "description": "Sealant - per tooth",
+          "category": "preventive",
+          "coverage_percent": 100,
+          "frequency": "1 per tooth per 36 mo",
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": "Through age 15; permanent molars only",
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D8080",
+          "description": "Comprehensive ortho treatment - adolescent",
+          "category": "ortho",
+          "coverage_percent": 50,
+          "frequency": null,
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": "Dependents to age 19",
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": true,
+          "notes": "Ortho paid as initial banding + quarterly installments to lifetime max"
+        }
+      ],
+      "limitations": {
+        "missing_tooth_clause": false,
+        "waiting_periods": [],
+        "age_limits": [
+          {
+            "ada_code": "D8080",
+            "limit": "Dependent children to age 19"
+          },
+          {
+            "ada_code": "D1206",
+            "limit": "Through age 18"
+          }
+        ],
+        "downgrades": []
+      },
+      "coordination_of_benefits": {
+        "has_other_coverage": false
+      },
+      "claim_history": [
+        {
+          "date": "2026-02-14",
+          "ada_code": "D1120",
+          "description": "Child prophy",
+          "tooth": null,
+          "paid_amount": 72.0
+        },
+        {
+          "date": "2026-02-14",
+          "ada_code": "D0120",
+          "description": "Periodic exam",
+          "tooth": null,
+          "paid_amount": 38.0
+        }
+      ],
+      "disclaimers": [
+        "Benefit quote is not a guarantee of payment. Final benefits are determined at claim adjudication."
+      ]
+    },
+    {
+      "verification": {
+        "reference_number": "VR-2026-100005",
+        "verified_at": "2026-05-30T09:14:00Z",
+        "source": "payer_portal",
+        "status": "completed",
+        "data_completeness": "eligibility_only"
+      },
+      "patient": {
+        "patient_id": "PT-0005",
+        "first_name": "Gregory",
+        "last_name": "Vasquez",
+        "date_of_birth": "1968-12-04",
+        "member_id": "GRD71006338",
+        "relationship_to_subscriber": "self"
+      },
+      "subscriber": {
+        "first_name": "Gregory",
+        "last_name": "Vasquez",
+        "member_id": "GRD71006338",
+        "date_of_birth": "1968-12-04"
+      },
+      "payer": {
+        "name": "Guardian",
+        "payer_id": "GUARDIAN",
+        "plan_name": "Guardian Dental PPO",
+        "plan_type": "PPO",
+        "group_number": "GRP-50914",
+        "group_name": "Former: Atlas Freight"
+      },
+      "coverage": {
+        "status": "terminated",
+        "effective_date": "2018-03-01",
+        "termination_date": "2025-12-31",
+        "in_network": null,
+        "plan_year_start": null,
+        "plan_year_end": null
+      },
+      "plan_maximums": {
+        "annual_maximum": null,
+        "annual_used": null,
+        "annual_remaining": null,
+        "lifetime_orthodontic_maximum": null,
+        "orthodontic_used": null
+      },
+      "deductibles": {
+        "individual_annual": null,
+        "individual_met": null,
+        "individual_remaining": null,
+        "family_annual": null,
+        "family_met": null,
+        "applies_to_categories": [],
+        "waived_for_categories": []
+      },
+      "coverage_by_category": {},
+      "procedure_benefits": [],
+      "limitations": {
+        "missing_tooth_clause": null,
+        "waiting_periods": [],
+        "age_limits": [],
+        "downgrades": []
+      },
+      "coordination_of_benefits": {
+        "has_other_coverage": false
+      },
+      "claim_history": [],
+      "disclaimers": [
+        "Coverage terminated 2025-12-31. No active benefits on file. Patient should be treated as self-pay unless new coverage is provided."
+      ]
+    },
+    {
+      "verification": {
+        "reference_number": "VR-2026-100006",
+        "verified_at": "2026-05-30T09:14:00Z",
+        "source": "payer_portal",
+        "status": "completed",
+        "data_completeness": "full_breakdown"
+      },
+      "patient": {
+        "patient_id": "PT-0006",
+        "first_name": "Hannah",
+        "last_name": "Brinstol",
+        "date_of_birth": "1991-05-19",
+        "member_id": "DDX559201144",
+        "relationship_to_subscriber": "self"
+      },
+      "subscriber": {
+        "first_name": "Hannah",
+        "last_name": "Bristol",
+        "member_id": "DDX559201144",
+        "date_of_birth": "1991-05-19"
+      },
+      "payer": {
+        "name": "Delta Dental",
+        "payer_id": "DDCA",
+        "plan_name": "Delta Dental PPO (Primary)",
+        "plan_type": "PPO",
+        "group_number": "GRP-88402",
+        "group_name": "Vela Health Systems"
+      },
+      "coverage": {
+        "status": "active",
+        "effective_date": "2023-01-01",
+        "termination_date": null,
+        "in_network": true,
+        "plan_year_start": "2026-01-01",
+        "plan_year_end": "2026-12-31"
+      },
+      "plan_maximums": {
+        "annual_maximum": 2000.0,
+        "annual_used": 300.0,
+        "annual_remaining": 1700.0,
+        "lifetime_orthodontic_maximum": null,
+        "orthodontic_used": null
+      },
+      "deductibles": {
+        "individual_annual": 50.0,
+        "individual_met": 50.0,
+        "individual_remaining": 0.0,
+        "family_annual": 150.0,
+        "family_met": 50.0,
+        "applies_to_categories": [
+          "basic",
+          "major"
+        ],
+        "waived_for_categories": [
+          "diagnostic",
+          "preventive"
+        ]
+      },
+      "coverage_by_category": {
+        "diagnostic": {
+          "in_network_percent": 100,
+          "out_network_percent": 100
+        },
+        "preventive": {
+          "in_network_percent": 100,
+          "out_network_percent": 100
+        },
+        "basic": {
+          "in_network_percent": 80,
+          "out_network_percent": 70
+        },
+        "major": {
+          "in_network_percent": 50,
+          "out_network_percent": 50
+        }
+      },
+      "procedure_benefits": [
+        {
+          "ada_code": "D0120",
+          "description": "Periodic oral evaluation",
+          "category": "diagnostic",
+          "coverage_percent": 100,
+          "frequency": "2 per benefit year",
+          "frequency_remaining": 1,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D2392",
+          "description": "Resin composite - two surfaces, posterior",
+          "category": "basic",
+          "coverage_percent": 80,
+          "frequency": "Once per surface per 24 mo",
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D2740",
+          "description": "Crown - porcelain/ceramic",
+          "category": "major",
+          "coverage_percent": 50,
+          "frequency": "1 per tooth per 5 years",
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": true,
+          "notes": null
+        }
+      ],
+      "limitations": {
+        "missing_tooth_clause": false,
+        "waiting_periods": [],
+        "age_limits": [],
+        "downgrades": []
+      },
+      "coordination_of_benefits": {
+        "has_other_coverage": true,
+        "this_plan_order": "primary",
+        "secondary": {
+          "name": "MetLife",
+          "payer_id": "METLIFE",
+          "plan_name": "MetLife Dental PPO",
+          "member_id": "MET33019887",
+          "subscriber_relationship": "spouse",
+          "coordination_method": "standard_cob",
+          "note": "Secondary may cover patient responsibility up to its own allowable; submit primary EOB with secondary claim."
+        }
+      },
+      "claim_history": [],
+      "disclaimers": [
+        "Benefit quote is not a guarantee of payment. Final benefits are determined at claim adjudication."
+      ]
+    },
+    {
+      "verification": {
+        "reference_number": "VR-2026-100007",
+        "verified_at": "2026-05-30T09:14:00Z",
+        "source": "payer_portal",
+        "status": "completed",
+        "data_completeness": "full_breakdown"
+      },
+      "patient": {
+        "patient_id": "PT-0007",
+        "first_name": "Tomas",
+        "last_name": "Eklund",
+        "date_of_birth": "1983-08-23",
+        "member_id": "CIG44820190",
+        "relationship_to_subscriber": "self"
+      },
+      "subscriber": {
+        "first_name": "Tomas",
+        "last_name": "Eklund",
+        "member_id": "CIG44820190",
+        "date_of_birth": "1983-08-23"
+      },
+      "payer": {
+        "name": "Cigna",
+        "payer_id": "CIGNA",
+        "plan_name": "Cigna Dental Care DHMO",
+        "plan_type": "DHMO",
+        "group_number": "GRP-72100",
+        "group_name": "Solano Manufacturing"
+      },
+      "coverage": {
+        "status": "active",
+        "effective_date": "2021-01-01",
+        "termination_date": null,
+        "in_network": true,
+        "plan_year_start": "2026-01-01",
+        "plan_year_end": "2026-12-31",
+        "assigned_facility": "Required - patient must use assigned DHMO office"
+      },
+      "plan_maximums": {
+        "annual_maximum": null,
+        "annual_used": null,
+        "annual_remaining": null,
+        "lifetime_orthodontic_maximum": null,
+        "orthodontic_used": null,
+        "note": "DHMO plans typically have no annual maximum; patient pays fixed copays"
+      },
+      "deductibles": {
+        "individual_annual": null,
+        "individual_met": null,
+        "individual_remaining": null,
+        "family_annual": null,
+        "family_met": null,
+        "applies_to_categories": [],
+        "waived_for_categories": []
+      },
+      "coverage_by_category": {},
+      "procedure_benefits": [
+        {
+          "ada_code": "D0120",
+          "description": "Periodic oral evaluation",
+          "category": "diagnostic",
+          "patient_copay": 0.0,
+          "coverage_percent": null,
+          "frequency": "2 per year",
+          "requires_preauth": false,
+          "notes": "Copay schedule plan"
+        },
+        {
+          "ada_code": "D1110",
+          "description": "Prophylaxis - adult",
+          "category": "preventive",
+          "patient_copay": 0.0,
+          "coverage_percent": null,
+          "frequency": "2 per year",
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D2391",
+          "description": "Resin composite - 1 surface",
+          "category": "basic",
+          "patient_copay": 38.0,
+          "coverage_percent": null,
+          "frequency": null,
+          "requires_preauth": false,
+          "notes": "Fixed copay per copay schedule"
+        },
+        {
+          "ada_code": "D2750",
+          "description": "Crown - PFM high noble",
+          "category": "major",
+          "patient_copay": 360.0,
+          "coverage_percent": null,
+          "frequency": "1 per tooth / 5 yr",
+          "requires_preauth": true,
+          "notes": "Fixed copay; lab fees may be additional"
+        }
+      ],
+      "limitations": {
+        "missing_tooth_clause": false,
+        "waiting_periods": [],
+        "age_limits": [],
+        "downgrades": [],
+        "plan_note": "Benefits are copay-schedule based, not percentage-based. Out-of-network services are not covered."
+      },
+      "coordination_of_benefits": {
+        "has_other_coverage": false
+      },
+      "claim_history": [],
+      "disclaimers": [
+        "Benefit quote is not a guarantee of payment. Final benefits are determined at claim adjudication."
+      ]
+    },
+    {
+      "verification": {
+        "reference_number": "VR-2026-100008",
+        "verified_at": "2026-05-30T09:14:00Z",
+        "source": "payer_portal",
+        "status": "completed",
+        "data_completeness": "full_breakdown"
+      },
+      "patient": {
+        "patient_id": "PT-0008",
+        "first_name": "Yusuf",
+        "last_name": "Demir",
+        "date_of_birth": "1972-02-17",
+        "member_id": "MET77410025",
+        "relationship_to_subscriber": "self"
+      },
+      "subscriber": {
+        "first_name": "Yusuf",
+        "last_name": "Demir",
+        "member_id": "MET77410025",
+        "date_of_birth": "1972-02-17"
+      },
+      "payer": {
+        "name": "MetLife",
+        "payer_id": "METLIFE",
+        "plan_name": "MetLife Dental PPO",
+        "plan_type": "PPO",
+        "group_number": "GRP-19023",
+        "group_name": "Pioneer Energy Partners"
+      },
+      "coverage": {
+        "status": "active",
+        "effective_date": "2017-01-01",
+        "termination_date": null,
+        "in_network": true,
+        "plan_year_start": "2026-01-01",
+        "plan_year_end": "2026-12-31"
+      },
+      "plan_maximums": {
+        "annual_maximum": 1500.0,
+        "annual_used": 0.0,
+        "annual_remaining": 1500.0,
+        "lifetime_orthodontic_maximum": null,
+        "orthodontic_used": null
+      },
+      "deductibles": {
+        "individual_annual": 50.0,
+        "individual_met": 0.0,
+        "individual_remaining": 50.0,
+        "family_annual": 150.0,
+        "family_met": 0.0,
+        "applies_to_categories": [
+          "basic",
+          "major"
+        ],
+        "waived_for_categories": [
+          "diagnostic",
+          "preventive"
+        ]
+      },
+      "coverage_by_category": {
+        "diagnostic": {
+          "in_network_percent": 100,
+          "out_network_percent": 100
+        },
+        "preventive": {
+          "in_network_percent": 100,
+          "out_network_percent": 100
+        },
+        "basic": {
+          "in_network_percent": 80,
+          "out_network_percent": 60
+        },
+        "major": {
+          "in_network_percent": 50,
+          "out_network_percent": 50
+        }
+      },
+      "procedure_benefits": [
+        {
+          "ada_code": "D0150",
+          "description": "Comprehensive oral evaluation",
+          "category": "diagnostic",
+          "coverage_percent": 100,
+          "frequency": "1 per 36 mo",
+          "frequency_remaining": 1,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D6240",
+          "description": "Pontic - porcelain fused to high noble metal",
+          "category": "major",
+          "coverage_percent": 50,
+          "frequency": null,
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": true,
+          "notes": "MISSING TOOTH CLAUSE: pontic for tooth missing prior to coverage effective date is NOT covered. Verify extraction date."
+        },
+        {
+          "ada_code": "D6010",
+          "description": "Surgical placement of implant body",
+          "category": "major",
+          "coverage_percent": 50,
+          "frequency": null,
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": true,
+          "notes": "Implant subject to missing tooth clause and major waiting period review"
+        }
+      ],
+      "limitations": {
+        "missing_tooth_clause": true,
+        "missing_tooth_clause_detail": "Prosthetic replacement of teeth lost before the member's effective date (2017-01-01) is excluded.",
+        "waiting_periods": [],
+        "age_limits": [],
+        "downgrades": []
+      },
+      "coordination_of_benefits": {
+        "has_other_coverage": false
+      },
+      "claim_history": [],
+      "disclaimers": [
+        "Benefit quote is not a guarantee of payment. Final benefits are determined at claim adjudication."
+      ]
+    },
+    {
+      "verification": {
+        "reference_number": "VR-2026-100009",
+        "verified_at": "2026-05-30T09:14:00Z",
+        "source": "payer_portal",
+        "status": "completed",
+        "data_completeness": "full_breakdown"
+      },
+      "patient": {
+        "patient_id": "PT-0009",
+        "first_name": "Eleanor",
+        "last_name": "Whitcomb",
+        "date_of_birth": "1958-07-09",
+        "member_id": "AET19920047",
+        "relationship_to_subscriber": "self"
+      },
+      "subscriber": {
+        "first_name": "Eleanor",
+        "last_name": "Whitcomb",
+        "member_id": "AET19920047",
+        "date_of_birth": "1958-07-09"
+      },
+      "payer": {
+        "name": "Aetna",
+        "payer_id": "AETNA",
+        "plan_name": "Aetna Dental Indemnity",
+        "plan_type": "Indemnity",
+        "group_number": "GRP-40028",
+        "group_name": "Retiree Trust 204"
+      },
+      "coverage": {
+        "status": "active",
+        "effective_date": "2010-01-01",
+        "termination_date": null,
+        "in_network": false,
+        "plan_year_start": "2026-01-01",
+        "plan_year_end": "2026-12-31",
+        "note": "Provider is out-of-network; benefits paid at UCR, patient responsible for balance billing"
+      },
+      "plan_maximums": {
+        "annual_maximum": 1000.0,
+        "annual_used": 0.0,
+        "annual_remaining": 1000.0,
+        "lifetime_orthodontic_maximum": null,
+        "orthodontic_used": null
+      },
+      "deductibles": {
+        "individual_annual": 100.0,
+        "individual_met": 0.0,
+        "individual_remaining": 100.0,
+        "family_annual": 300.0,
+        "family_met": 0.0,
+        "applies_to_categories": [
+          "basic",
+          "major"
+        ],
+        "waived_for_categories": [
+          "diagnostic",
+          "preventive"
+        ]
+      },
+      "coverage_by_category": {
+        "diagnostic": {
+          "in_network_percent": 80,
+          "out_network_percent": 80
+        },
+        "preventive": {
+          "in_network_percent": 80,
+          "out_network_percent": 80
+        },
+        "basic": {
+          "in_network_percent": 60,
+          "out_network_percent": 60
+        },
+        "major": {
+          "in_network_percent": 40,
+          "out_network_percent": 40
+        }
+      },
+      "procedure_benefits": [
+        {
+          "ada_code": "D0120",
+          "description": "Periodic oral evaluation",
+          "category": "diagnostic",
+          "coverage_percent": 80,
+          "frequency": "2 per benefit year",
+          "frequency_remaining": 2,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": "Paid at 80% of UCR allowance; patient owes difference"
+        },
+        {
+          "ada_code": "D1110",
+          "description": "Prophylaxis - adult",
+          "category": "preventive",
+          "coverage_percent": 80,
+          "frequency": "2 per benefit year",
+          "frequency_remaining": 2,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D2740",
+          "description": "Crown - porcelain/ceramic",
+          "category": "major",
+          "coverage_percent": 40,
+          "frequency": null,
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": true,
+          "notes": "40% of UCR; expect significant patient balance"
+        }
+      ],
+      "limitations": {
+        "missing_tooth_clause": false,
+        "waiting_periods": [],
+        "age_limits": [],
+        "downgrades": [],
+        "reimbursement_basis": "Usual, Customary & Reasonable (UCR) - 80th percentile"
+      },
+      "coordination_of_benefits": {
+        "has_other_coverage": false
+      },
+      "claim_history": [],
+      "disclaimers": [
+        "Benefit quote is not a guarantee of payment. Final benefits are determined at claim adjudication."
+      ]
+    },
+    {
+      "verification": {
+        "reference_number": "VR-2026-100010",
+        "verified_at": "2026-05-30T09:14:00Z",
+        "source": "payer_portal",
+        "status": "completed",
+        "data_completeness": "full_breakdown"
+      },
+      "patient": {
+        "patient_id": "PT-0010",
+        "first_name": "Devon",
+        "last_name": "Marsh",
+        "date_of_birth": "2000-04-25",
+        "member_id": "GRD60155209",
+        "relationship_to_subscriber": "self"
+      },
+      "subscriber": {
+        "first_name": "Devon",
+        "last_name": "Marsh",
+        "member_id": "GRD60155209",
+        "date_of_birth": "2000-04-25"
+      },
+      "payer": {
+        "name": "Guardian",
+        "payer_id": "GUARDIAN",
+        "plan_name": "Guardian Dental PPO",
+        "plan_type": "PPO",
+        "group_number": "GRP-30551",
+        "group_name": "Lumen Creative Group"
+      },
+      "coverage": {
+        "status": "active",
+        "effective_date": "2024-06-01",
+        "termination_date": null,
+        "in_network": true,
+        "plan_year_start": "2026-01-01",
+        "plan_year_end": "2026-12-31"
+      },
+      "plan_maximums": {
+        "annual_maximum": 1250.0,
+        "annual_used": 133.0,
+        "annual_remaining": 1117.0,
+        "lifetime_orthodontic_maximum": null,
+        "orthodontic_used": null
+      },
+      "deductibles": {
+        "individual_annual": 50.0,
+        "individual_met": 0.0,
+        "individual_remaining": 50.0,
+        "family_annual": 150.0,
+        "family_met": 0.0,
+        "applies_to_categories": [
+          "basic",
+          "major"
+        ],
+        "waived_for_categories": [
+          "diagnostic",
+          "preventive"
+        ]
+      },
+      "coverage_by_category": {
+        "diagnostic": {
+          "in_network_percent": 100,
+          "out_network_percent": 80
+        },
+        "preventive": {
+          "in_network_percent": 100,
+          "out_network_percent": 80
+        },
+        "basic": {
+          "in_network_percent": 80,
+          "out_network_percent": 50
+        },
+        "major": {
+          "in_network_percent": 50,
+          "out_network_percent": 50
+        }
+      },
+      "procedure_benefits": [
+        {
+          "ada_code": "D1110",
+          "description": "Prophylaxis - adult",
+          "category": "preventive",
+          "coverage_percent": 100,
+          "frequency": "2 per benefit year (6-mo interval)",
+          "frequency_remaining": 1,
+          "last_paid_date": "2026-05-05",
+          "next_eligible_date": "2026-11-05",
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": "Cleaned 25 days ago; next prophy not eligible until 2026-11-05"
+        },
+        {
+          "ada_code": "D0274",
+          "description": "Bitewings - four films",
+          "category": "diagnostic",
+          "coverage_percent": 100,
+          "frequency": "1 per benefit year",
+          "frequency_remaining": 0,
+          "last_paid_date": "2026-05-05",
+          "next_eligible_date": "2027-01-01",
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D0120",
+          "description": "Periodic oral evaluation",
+          "category": "diagnostic",
+          "coverage_percent": 100,
+          "frequency": "2 per benefit year",
+          "frequency_remaining": 1,
+          "last_paid_date": "2026-05-05",
+          "next_eligible_date": "2026-11-05",
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        },
+        {
+          "ada_code": "D2391",
+          "description": "Resin composite - one surface, posterior",
+          "category": "basic",
+          "coverage_percent": 80,
+          "frequency": "Once per surface per 24 mo",
+          "frequency_remaining": null,
+          "last_paid_date": null,
+          "next_eligible_date": null,
+          "age_limit": null,
+          "waiting_period_months": 0,
+          "waiting_period_met": true,
+          "alternate_benefit": null,
+          "requires_preauth": false,
+          "notes": null
+        }
+      ],
+      "limitations": {
+        "missing_tooth_clause": false,
+        "waiting_periods": [],
+        "age_limits": [],
+        "downgrades": []
+      },
+      "coordination_of_benefits": {
+        "has_other_coverage": false
+      },
+      "claim_history": [
+        {
+          "date": "2026-05-05",
+          "ada_code": "D1110",
+          "description": "Adult prophy",
+          "tooth": null,
+          "paid_amount": 88.0
+        },
+        {
+          "date": "2026-05-05",
+          "ada_code": "D0120",
+          "description": "Periodic exam",
+          "tooth": null,
+          "paid_amount": 33.0
+        },
+        {
+          "date": "2026-05-05",
+          "ada_code": "D0274",
+          "description": "Bitewings x4",
+          "tooth": null,
+          "paid_amount": 12.0
+        }
+      ],
+      "disclaimers": [
+        "Benefit quote is not a guarantee of payment. Final benefits are determined at claim adjudication."
+      ]
+    }
+  ]
+}

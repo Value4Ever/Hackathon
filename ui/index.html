@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dental Coverage Verifier</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --accent: #0ea5e9;
+    --accent-dark: #0284c7;
+    --good: #16a34a;
+    --warn: #d97706;
+    --bad:  #dc2626;
+    --shade: #f1f5f9;
+    --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.04);
+    --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  header {
+    background: var(--gradient-1); color: white;
+    padding: 18px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  header h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.2px; }
+  header .sub { font-size: 12px; opacity: 0.88; margin-top: 3px; }
+  header .brand { text-align: right; font-size: 11px; opacity: 0.75; }
+  .layout { display: grid; grid-template-columns: 380px 1fr; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; }
+  .card {
+    background: var(--card); border-radius: 10px; box-shadow: var(--shadow-card);
+    padding: 18px; margin-bottom: 14px; transition: box-shadow 0.15s;
+  }
+  .card:hover { box-shadow: var(--shadow-card-hover); }
+  .card h2 {
+    margin: 0 0 14px; font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card h2 .num {
+    background: var(--accent); color: white; width: 22px; height: 22px;
+    border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; margin-top: 8px; font-weight: 500; }
+  select, input[type=text], input[type=number] {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 6px;
+    font: inherit; background: white; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  select:focus, input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  button {
+    background: var(--accent); color: white; border: 0; border-radius: 6px;
+    padding: 9px 16px; font-weight: 600; cursor: pointer; font: inherit;
+    transition: background 0.15s, transform 0.05s;
+  }
+  button:hover { background: var(--accent-dark); }
+  button:active { transform: translateY(1px); }
+  button.secondary { background: var(--shade); color: var(--text); }
+  button.secondary:hover { background: #e2e8f0; }
+  button.ghost { background: transparent; color: var(--accent); }
+  button.ghost:hover { background: var(--shade); }
+  button.full { width: 100%; }
+  .row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+  .row > div { flex: 1; }
+  .pill {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    margin-right: 4px;
+  }
+  .pill.active { background: #dcfce7; color: #166534; }
+  .pill.terminated { background: #fee2e2; color: #991b1b; }
+  .pill.waiting { background: #fef3c7; color: #92400e; }
+  .pill.network { background: #dbeafe; color: #1e40af; }
+  .pill.oon { background: #fde68a; color: #78350f; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.covered td.amount.patient { color: var(--bad); font-weight: 700; }
+  tr.covered td.amount.carrier { color: var(--good); font-weight: 700; }
+  tr.notcovered td.amount.patient { color: var(--bad); font-weight: 700; }
+  tr.notcovered td.amount.carrier { color: var(--muted); }
+  tr.notcovered td:first-child { opacity: 0.65; }
+
+  .totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+  .total-card {
+    background: var(--shade); padding: 14px; border-radius: 8px;
+    transition: transform 0.1s;
+  }
+  .total-card .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+  .total-card .val { font-size: 24px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .total-card.patient .val { color: var(--bad); }
+  .total-card.carrier .val { color: var(--good); }
+
+  .annotation {
+    background: #fefce8; border-left: 4px solid #facc15; padding: 12px 16px;
+    border-radius: 6px; margin: 10px 0; font-size: 13px; color: #713f12;
+  }
+  .cob-annotation {
+    background: #ecfeff; border-left: 4px solid #06b6d4; padding: 12px 16px;
+    border-radius: 6px; margin: 10px 0; font-size: 13px; color: #155e75;
+  }
+  .placeholder { color: var(--muted); padding: 30px 0; text-align: center; font-style: italic; }
+  .explainer { font-size: 12px; color: var(--muted); margin-top: 4px; font-style: italic; }
+  .ada-row { display: grid; grid-template-columns: 90px 1fr 90px 28px; gap: 6px; margin-bottom: 6px; align-items: center; }
+  .ada-row input { padding: 7px 9px; font-size: 13px; }
+  .ada-row .rm { background: transparent; color: var(--bad); padding: 4px 8px; font-size: 18px; font-weight: bold; }
+  .ada-row .rm:hover { background: #fee2e2; }
+
+  /* Simulator */
+  .simulator-row {
+    display: grid; grid-template-columns: 90px 1fr 80px; gap: 10px;
+    align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--border);
+  }
+  .simulator-row:last-child { border: 0; }
+  .simulator-row .label-cell { font-size: 12px; }
+  .simulator-row .label-cell code { color: var(--accent); font-weight: 600; }
+  .simulator-row .val-cell { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; font-size: 14px; }
+  .live-badge {
+    background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    display: inline-block; margin-left: 8px;
+  }
+  .live-badge.recalc { background: #fef3c7; color: #92400e; }
+
+  /* LLM explanation */
+  .llm-explanation {
+    background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 100%);
+    border-left: 4px solid #8b5cf6; padding: 16px 18px;
+    border-radius: 8px; margin: 14px 0;
+    font-size: 14px; line-height: 1.6; color: #4c1d95;
+    white-space: pre-wrap;
+  }
+  .llm-explanation .badge {
+    display: inline-block; background: #8b5cf6; color: white; padding: 2px 8px;
+    border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 8px;
+  }
+  .spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid var(--shade); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .footer-tag {
+    text-align: center; padding: 18px 20px; font-size: 11px; color: var(--muted);
+  }
+
+  /* Actions toolbar */
+  .actions {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Action Center / Exceptions */
+  .exception-card {
+    border: 1px solid var(--border); border-left: 4px solid #f97316;
+    border-radius: 8px; padding: 14px; margin: 12px 0; background: #fff7ed;
+  }
+  .exception-card.severity-high   { border-left-color: var(--bad); background: #fef2f2; }
+  .exception-card.severity-medium { border-left-color: var(--warn); background: #fffbeb; }
+  .exception-card.severity-low    { border-left-color: var(--accent); background: #f0f9ff; }
+  .exception-card .code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px;
+    background: white; padding: 2px 8px; border-radius: 4px;
+    border: 1px solid var(--border); display: inline-block;
+  }
+  .exception-card .summary { margin: 8px 0; font-size: 13px; color: var(--text); }
+  .action-tile {
+    background: white; border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 12px; margin: 6px 0; cursor: pointer; transition: all 0.15s;
+  }
+  .action-tile:hover { border-color: var(--accent); box-shadow: var(--shadow-card-hover); }
+  .action-tile .channel-pill {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    color: white; margin-right: 8px;
+  }
+  .channel-sms { background: #06b6d4; }
+  .channel-call { background: #8b5cf6; }
+  .channel-insurance_call { background: #d97706; }
+  .channel-web_form { background: #16a34a; }
+  .action-tile .subject { font-weight: 600; font-size: 13px; }
+  .action-tile .preview { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .action-tile .script-list { font-size: 12px; margin-top: 6px; padding-left: 18px; color: var(--text); }
+  .action-tile .script-list li { margin: 2px 0; }
+  .action-tile .actions { display: flex; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
+  .action-tile .actions button { padding: 5px 10px; font-size: 11px; }
+  .modal-bg {
+    position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,0.6);
+    display:flex; align-items:center; justify-content:center; z-index:100;
+  }
+  .modal {
+    background:white; border-radius:10px; padding:20px; max-width:520px; width:90%;
+    max-height:80vh; overflow-y:auto;
+  }
+  .modal h3 { margin: 0 0 10px; }
+  .modal pre { background: var(--shade); padding: 10px; border-radius: 4px; font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+
+  /* Print stylesheet for PDF export */
+  @media print {
+    body { background: white; font-size: 12px; }
+    header { background: white; color: var(--text); border-bottom: 2px solid var(--accent); }
+    header h1 { color: var(--text); }
+    header .sub { color: var(--muted); }
+    .layout { display: block; padding: 0; max-width: 100%; }
+    .card { box-shadow: none; border: 1px solid var(--border); page-break-inside: avoid; }
+    .actions, button, .ghost, .full, #patient-section, #plan-section, #verify-section, #simulator-section { display: none !important; }
+    .total-card { background: white; border: 1px solid var(--border); }
+    .annotation, .cob-annotation, .llm-explanation { page-break-inside: avoid; }
+    table { font-size: 11px; }
+    .print-only { display: block !important; }
+    .print-disclaimer {
+      margin-top: 20px; padding: 10px; border-top: 1px solid var(--border);
+      font-size: 10px; color: var(--muted); font-style: italic;
+    }
+  }
+  .print-only { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🦷 Dental Coverage Verifier</h1>
+    <div class="sub">Prices and explains a treatment plan against your dental benefits</div>
+  </div>
+  <div class="brand">
+    Hackathon MVP<br>
+    Built with MT+™ pattern
+  </div>
+</header>
+
+<div class="layout">
+  <!-- LEFT: input -->
+  <div>
+    <div class="card" id="patient-section">
+      <h2><span class="num">1</span> Patient lookup</h2>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button class="ghost" id="tab-known" onclick="setLookupTab('known')" style="flex:1;font-size:12px">Known patient</button>
+        <button class="ghost" id="tab-walkin" onclick="setLookupTab('walkin')" style="flex:1;font-size:12px">New / Walk-in</button>
+      </div>
+      <div id="lookup-known">
+        <label>Select mock patient</label>
+        <select id="patient-select">
+          <option value="">— pick a patient —</option>
+        </select>
+      </div>
+      <div id="lookup-walkin" style="display:none">
+        <label>Member ID (preferred)</label>
+        <input type="text" id="walkin-member" placeholder="e.g. DDX448120731" />
+        <div style="font-size:11px;color:var(--muted);margin:6px 0">— or supply all 3 below —</div>
+        <label>First name</label>
+        <input type="text" id="walkin-first" placeholder="Marcus" />
+        <label>Last name</label>
+        <input type="text" id="walkin-last" placeholder="Halloway" />
+        <label>DOB (YYYY-MM-DD)</label>
+        <input type="text" id="walkin-dob" placeholder="1989-03-12" />
+        <label>Payer ID (optional)</label>
+        <input type="text" id="walkin-payer" placeholder="DDCA" />
+        <button class="full" onclick="lookupWalkin()" style="margin-top:10px">Look up eligibility</button>
+      </div>
+      <div id="patient-info" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card" id="plan-section">
+      <h2><span class="num">2</span> Treatment Plan</h2>
+      <div id="ada-rows"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="secondary" onclick="addAdaRow()">+ Procedure</button>
+        <button class="ghost" onclick="presetCleaning()">Cleaning</button>
+        <button class="ghost" onclick="presetCrown()">Crown</button>
+        <button class="ghost" onclick="presetBigPlan()">Bigger plan</button>
+      </div>
+    </div>
+
+    <div class="card" id="verify-section">
+      <h2><span class="num">3</span> Verify</h2>
+      <button onclick="runVerify()" class="full">Run coverage analysis</button>
+      <div class="explainer">Calls <code>/v1/verify</code>. Results appear on the right.</div>
+    </div>
+
+    <div class="card" id="simulator-section" style="display:none">
+      <h2><span class="num">4</span> What-if simulator <span id="sim-status" class="live-badge">live</span></h2>
+      <div class="explainer" style="margin-bottom:10px">Slide a fee — total OOP updates live.</div>
+      <div id="simulator-rows"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:700">You pay</div>
+          <div id="sim-patient-total" style="font-size:22px;font-weight:800;color:var(--bad);font-variant-numeric:tabular-nums">$0.00</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:700">Δ from baseline</div>
+          <div id="sim-delta" style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: results -->
+  <div>
+    <div class="card">
+      <h2>Results</h2>
+      <div id="results">
+        <div class="placeholder">Select a patient + add procedures, then click <b>Run coverage analysis</b>.</div>
+      </div>
+      <div class="actions" id="actions" style="display:none">
+        <button onclick="explainWithLLM()" id="llm-btn">✨ Explain in plain English</button>
+        <button class="secondary" onclick="window.print()">🖨️ Export PDF</button>
+        <button class="ghost" onclick="copyJson()">Copy JSON</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="print-only print-disclaimer">
+  Generated by Dental Coverage Verifier. All patient data is fabricated demo data. Estimates only — confirm with carrier.
+</div>
+
+<div class="footer-tag">
+  Demo data is fabricated · Engine prices treatment plans; clinical decisions stay with the dentist · MT+™ pattern
+</div>
+
+<script>
+const API = ''; // same-origin
+let patients = [];
+let adaRowCount = 0;
+let lastVerifyResult = null;
+let baselineTotal = 0;
+
+const COMMON_ADA = [
+  { code:'D0120', desc:'Periodic oral evaluation', fee:95 },
+  { code:'D0150', desc:'Comprehensive oral evaluation', fee:135 },
+  { code:'D0210', desc:'X-rays - full mouth (FMX)', fee:165 },
+  { code:'D0274', desc:'Bitewings - four films', fee:90 },
+  { code:'D1110', desc:'Prophylaxis - adult cleaning', fee:130 },
+  { code:'D1120', desc:'Prophylaxis - child', fee:90 },
+  { code:'D1206', desc:'Topical fluoride varnish', fee:50 },
+  { code:'D2391', desc:'Resin composite - 1 surface', fee:250 },
+  { code:'D2392', desc:'Resin composite - 2 surface', fee:325 },
+  { code:'D2740', desc:'Crown - porcelain/ceramic', fee:1300 },
+  { code:'D2750', desc:'Crown - porcelain fused to metal', fee:1200 },
+  { code:'D3310', desc:'Root canal - anterior', fee:850 },
+  { code:'D3330', desc:'Root canal - molar', fee:1250 },
+  { code:'D6240', desc:'Pontic - porcelain fused to metal', fee:1100 },
+  { code:'D6750', desc:'Retainer crown - porcelain fused to metal', fee:1100 },
+  { code:'D6010', desc:'Implant body - endosteal', fee:2200 },
+  { code:'D7140', desc:'Extraction - erupted tooth', fee:215 },
+  { code:'D7210', desc:'Surgical extraction', fee:325 },
+  { code:'D8080', desc:'Comprehensive orthodontic treatment', fee:5500 },
+];
+
+async function loadPatients() {
+  const r = await fetch(API + '/v1/patients').then(r => r.json());
+  patients = r.patients || [];
+  const sel = document.getElementById('patient-select');
+  for (const p of patients) {
+    const opt = document.createElement('option');
+    opt.value = p.patient_id;
+    opt.textContent = p.patient_id + ' — ' + p.first_name + ' ' + p.last_name + ' (' + (p.payer_id || 'unknown') + ')';
+    sel.appendChild(opt);
+  }
+}
+document.addEventListener('DOMContentLoaded', loadPatients);
+
+document.getElementById('patient-select').addEventListener('change', async (e) => {
+  const id = e.target.value;
+  const div = document.getElementById('patient-info');
+  if (!id) { div.innerHTML = ''; return; }
+  const rec = await fetch(API + '/v1/patients/' + id).then(r => r.json());
+  const cov = rec.coverage || {};
+  const pm = rec.plan_maximums || {};
+  const ded = rec.deductibles || {};
+  const lim = rec.limitations || {};
+  const cob = rec.coordination_of_benefits || {};
+  let pills = '';
+  pills += '<span class="pill ' + (cov.status === 'active' ? 'active' : 'terminated') + '">' + (cov.status || '?') + '</span>';
+  pills += '<span class="pill ' + (cov.in_network ? 'network' : 'oon') + '">' + (cov.in_network ? 'in-network' : 'out-of-network') + '</span>';
+  if (rec.payer && rec.payer.plan_type) pills += '<span class="pill">' + rec.payer.plan_type + '</span>';
+  if (lim.missing_tooth_clause) pills += '<span class="pill waiting">missing tooth</span>';
+  if (cob.has_other_coverage || cob.has_secondary) pills += '<span class="pill waiting">COB ' + (cob.this_plan_order || '') + '</span>';
+  div.innerHTML = pills + '<div style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.7">' +
+    '<b>' + (rec.payer?.name || '?') + '</b><br>' +
+    'Annual max: $' + (pm.annual_remaining ?? '?') + ' of $' + (pm.annual_maximum ?? '?') + ' remaining<br>' +
+    'Deductible: $' + (ded.individual_met ?? 0) + ' met of $' + (ded.individual_annual ?? '?') +
+    '</div>';
+});
+
+function addAdaRow(presetCode, presetFee) {
+  const id = ++adaRowCount;
+  const wrap = document.getElementById('ada-rows');
+  const div = document.createElement('div');
+  div.className = 'ada-row';
+  div.id = 'row-' + id;
+  div.innerHTML = `
+    <input list="ada-codes" placeholder="D0120" value="${presetCode || ''}" onchange="onCodeChange(${id})" />
+    <input type="text" placeholder="description" id="desc-${id}" disabled style="background:var(--shade);color:var(--muted)" />
+    <input type="number" placeholder="fee" value="${presetFee || ''}" id="fee-${id}" />
+    <button class="rm" onclick="document.getElementById('row-${id}').remove()" title="Remove">×</button>
+  `;
+  wrap.appendChild(div);
+  if (!document.getElementById('ada-codes')) {
+    const dl = document.createElement('datalist');
+    dl.id = 'ada-codes';
+    for (const c of COMMON_ADA) {
+      const o = document.createElement('option');
+      o.value = c.code; o.textContent = c.code + ' — ' + c.desc; dl.appendChild(o);
+    }
+    document.body.appendChild(dl);
+  }
+  if (presetCode) onCodeChange(id);
+}
+
+function onCodeChange(id) {
+  const row = document.getElementById('row-' + id);
+  if (!row) return;
+  const input = row.querySelector('input');
+  const code = (input.value || '').toUpperCase().trim();
+  input.value = code;
+  const c = COMMON_ADA.find(x => x.code === code);
+  if (c) {
+    document.getElementById('desc-' + id).value = c.desc;
+    const feeI = document.getElementById('fee-' + id);
+    if (!feeI.value) feeI.value = c.fee;
+  } else {
+    document.getElementById('desc-' + id).value = '';
+  }
+}
+
+function getTreatmentPlan() {
+  const plan = [];
+  document.querySelectorAll('.ada-row').forEach(row => {
+    const code = row.querySelector('input').value.toUpperCase().trim();
+    const fee = parseFloat(row.querySelector('input[type=number]').value) || 0;
+    if (code) plan.push({ ada_code: code, fee });
+  });
+  return plan;
+}
+
+function presetCleaning() {
+  document.getElementById('ada-rows').innerHTML = ''; adaRowCount = 0;
+  [['D0120',95],['D1110',130],['D0274',90]].forEach(([c,f]) => addAdaRow(c, f));
+}
+function presetCrown() {
+  document.getElementById('ada-rows').innerHTML = ''; adaRowCount = 0;
+  [['D0150',135],['D0210',165],['D2750',1200],['D2391',250]].forEach(([c,f]) => addAdaRow(c, f));
+}
+function presetBigPlan() {
+  document.getElementById('ada-rows').innerHTML = ''; adaRowCount = 0;
+  [['D0150',135],['D0210',165],['D1110',130],['D2391',250],['D2392',325],['D3330',1250],['D2750',1200]].forEach(([c,f]) => addAdaRow(c, f));
+}
+
+async function runVerify() {
+  const patientId = document.getElementById('patient-select').value;
+  if (!patientId) { alert('Pick a patient first.'); return; }
+  const plan = getTreatmentPlan();
+  if (plan.length === 0) { alert('Add at least one procedure.'); return; }
+  const out = document.getElementById('results');
+  out.innerHTML = '<div class="placeholder"><span class="spinner"></span> Calling /v1/verify ...</div>';
+  const res = await fetch(API + '/v1/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ patient_id: patientId, treatment_plan: plan })
+  }).then(r => r.json()).catch(e => ({ error: e.message }));
+  lastVerifyResult = res;
+  baselineTotal = res.totals?.patient_pays || 0;
+  renderResults(res);
+  renderSimulator(plan, res);
+  document.getElementById('actions').style.display = 'flex';
+
+  // Append Action Center if any exceptions surfaced
+  if (res.exceptions && res.exceptions.length > 0) {
+    const wrap = document.createElement('div');
+    wrap.id = 'exception-section';
+    wrap.style.marginTop = '20px';
+    wrap.innerHTML = '<h2 style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin:0 0 10px">⚠ Action Center · exceptions requiring follow-up</h2>';
+    document.getElementById('results').appendChild(wrap);
+    window._lastExceptions = res.exceptions;
+    window._exceptionContext = { source: 'verify', patient_id: res.patient.patient_id };
+    let html = '';
+    for (let i = 0; i < res.exceptions.length; i++) {
+      const e = res.exceptions[i];
+      html += '<div class="exception-card severity-' + e.severity + '">' +
+        '<div><span class="code">' + e.code + '</span>' +
+        '<span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-left:8px">severity: ' + e.severity + '</span></div>' +
+        '<div class="summary">' + e.summary + '</div>';
+      if (e.affected_ada_code) html += '<div style="font-size:11px;color:var(--muted)">Affected procedure: <code>' + e.affected_ada_code + '</code></div>';
+      html += '<div style="font-size:11px;color:var(--muted);margin-top:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Recommended actions:</div>';
+      for (let j = 0; j < (e.action_plan || []).length; j++) {
+        const a = e.action_plan[j];
+        if (!a) continue;
+        html += '<div class="action-tile">' +
+          '<div><span class="channel-pill channel-' + a.channel + '">' + a.channel.replace('_', ' ') + '</span>' +
+          '<span class="subject">' + a.subject + '</span></div>';
+        if (a.body) html += '<div class="preview">' + escapeHtml(a.body) + '</div>';
+        if (a.script) {
+          html += '<details style="margin-top:6px"><summary style="font-size:12px;color:var(--accent);cursor:pointer">View call script (' + a.script.length + ' steps)</summary>';
+          html += '<ol class="script-list">';
+          for (const line of a.script) html += '<li>' + escapeHtml(line) + '</li>';
+          html += '</ol></details>';
+        }
+        if (a.phone) html += '<div style="font-size:11px;color:var(--muted);margin-top:4px">📞 ' + a.phone + '</div>';
+        html += '<div class="actions">' +
+          '<button onclick="executeAction(' + i + ',' + j + ')">Execute (mock)</button>' +
+          (a.channel === 'call' || a.channel === 'insurance_call'
+            ? '<button class="secondary" onclick="copyScript(' + i + ',' + j + ')">Copy script</button>' : '') +
+          (a.channel === 'sms'
+            ? '<button class="secondary" onclick="copyBody(' + i + ',' + j + ')">Copy SMS</button>' : '') +
+          '</div></div>';
+      }
+      html += '</div>';
+    }
+    wrap.insertAdjacentHTML('beforeend', html);
+  }
+}
+
+function renderResults(r) {
+  const out = document.getElementById('results');
+  if (r.error) { out.innerHTML = '<div class="placeholder">Error: ' + r.error + '</div>'; return; }
+  const t = r.totals || {};
+  const cov = r.coverage_active ? '<span class="pill active">coverage active</span>' : '<span class="pill terminated">coverage ' + r.coverage_status + '</span>';
+  let html = '<div style="margin-bottom:14px;font-size:14px">' + cov + ' for <b>' + r.patient.first_name + ' ' + r.patient.last_name + '</b> (payer: ' + (r.payer?.name || '?') + ')</div>';
+
+  html += '<table><thead><tr><th>ADA</th><th>Description</th><th class="num">Fee</th><th class="num">Insurance</th><th class="num">You Pay</th><th>Notes</th></tr></thead><tbody>';
+  for (const l of r.lines) {
+    const cls = l.covered ? 'covered' : 'notcovered';
+    const noteParts = [];
+    if (l.deductible_applied > 0) noteParts.push('ded $' + l.deductible_applied.toFixed(0));
+    if (l.copay != null) noteParts.push('copay $' + l.copay.toFixed(0));
+    if (l.coverage_percent != null && l.coverage_percent < 100) noteParts.push(l.coverage_percent + '%');
+    if (l.annual_max_capped > 0) noteParts.push('max-cap $' + l.annual_max_capped.toFixed(0));
+    if (l.downgrade_applied) noteParts.push('alt-benefit → ' + l.downgrade_to);
+    if (l.not_covered_reason) noteParts.push(l.not_covered_reason);
+    html += '<tr class="' + cls + '">' +
+      '<td><b>' + l.ada_code + '</b></td>' +
+      '<td>' + (l.description || '') + (l.plain_english ? '<div class="explainer">' + l.plain_english + '</div>' : '') + '</td>' +
+      '<td class="num">$' + l.usual_fee.toFixed(2) + '</td>' +
+      '<td class="num amount carrier">$' + l.carrier_pays.toFixed(2) + '</td>' +
+      '<td class="num amount patient">$' + l.patient_pays.toFixed(2) + '</td>' +
+      '<td style="font-size:11px;color:var(--muted)">' + noteParts.join(' · ') + '</td>' +
+      '</tr>';
+  }
+  html += '</tbody></table>';
+
+  html += '<div class="totals">' +
+    totalCard('Usual fees', t.usual_fees, '') +
+    totalCard('Insurance pays', t.carrier_pays, 'carrier') +
+    totalCard('You pay', t.patient_pays, 'patient') +
+    totalCard('Annual max left', t.annual_max_remaining_after, '') +
+    '</div>';
+
+  if (r.annotations && r.annotations.length) {
+    for (const a of r.annotations) {
+      const isCob = /Coordination of Benefits/i.test(a);
+      html += '<div class="' + (isCob ? 'cob-annotation' : 'annotation') + '">' + a + '</div>';
+    }
+  }
+  if (r.cob && r.cob.final_estimated_patient_oop != null) {
+    html += '<div class="cob-annotation"><b>Secondary insurance estimate (' + r.cob.secondary.name + '):</b> ' +
+      'Primary leaves $' + r.cob.patient_responsibility_after_primary.toFixed(2) + '. ' +
+      'Secondary estimated contribution: $' + r.cob.secondary_estimated_contribution.toFixed(2) + ' (' + r.cob.secondary_assumed_coverage_pct + '% heuristic). ' +
+      '<b>Final estimated patient OOP: $' + r.cob.final_estimated_patient_oop.toFixed(2) + '</b>. ' +
+      '<i>Estimate only — confirm with secondary EOB.</i></div>';
+  }
+
+  out.innerHTML = html;
+}
+
+function totalCard(label, val, cls) {
+  const v = val == null ? 'n/a' : ('$' + Number(val).toFixed(2));
+  return '<div class="total-card ' + cls + '"><div class="lbl">' + label + '</div><div class="val">' + v + '</div></div>';
+}
+
+// ── What-if simulator ──────────────────────────────────────────
+function renderSimulator(plan, baselineResult) {
+  const wrap = document.getElementById('simulator-rows');
+  wrap.innerHTML = '';
+  document.getElementById('simulator-section').style.display = 'block';
+  document.getElementById('sim-patient-total').textContent = '$' + (baselineResult.totals?.patient_pays || 0).toFixed(2);
+  document.getElementById('sim-delta').textContent = '—';
+
+  for (const item of plan) {
+    const baseFee = item.fee;
+    const minFee = Math.round(baseFee * 0.3);
+    const maxFee = Math.round(baseFee * 2.0);
+    const row = document.createElement('div');
+    row.className = 'simulator-row';
+    row.dataset.code = item.ada_code;
+    row.innerHTML = `
+      <div class="label-cell"><code>${item.ada_code}</code></div>
+      <input type="range" min="${minFee}" max="${maxFee}" value="${baseFee}" data-base="${baseFee}" oninput="onSimChange(this)" />
+      <div class="val-cell">$<span class="sim-fee">${baseFee.toFixed(0)}</span></div>
+    `;
+    wrap.appendChild(row);
+  }
+}
+
+let simTimer = null;
+function onSimChange(slider) {
+  const row = slider.parentElement;
+  const valSpan = row.querySelector('.sim-fee');
+  valSpan.textContent = parseFloat(slider.value).toFixed(0);
+  document.getElementById('sim-status').textContent = 'recalculating...';
+  document.getElementById('sim-status').className = 'live-badge recalc';
+  clearTimeout(simTimer);
+  simTimer = setTimeout(runSimVerify, 200);
+}
+
+async function runSimVerify() {
+  const patientId = document.getElementById('patient-select').value;
+  const plan = [];
+  document.querySelectorAll('#simulator-rows .simulator-row').forEach(row => {
+    plan.push({ ada_code: row.dataset.code, fee: parseFloat(row.querySelector('input[type=range]').value) });
+  });
+  const res = await fetch(API + '/v1/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ patient_id: patientId, treatment_plan: plan })
+  }).then(r => r.json());
+  const oop = res.totals?.patient_pays || 0;
+  document.getElementById('sim-patient-total').textContent = '$' + oop.toFixed(2);
+  const delta = oop - baselineTotal;
+  const deltaEl = document.getElementById('sim-delta');
+  if (Math.abs(delta) < 0.005) {
+    deltaEl.textContent = '—'; deltaEl.style.color = 'var(--muted)';
+  } else if (delta > 0) {
+    deltaEl.textContent = '+$' + delta.toFixed(2); deltaEl.style.color = 'var(--bad)';
+  } else {
+    deltaEl.textContent = '−$' + Math.abs(delta).toFixed(2); deltaEl.style.color = 'var(--good)';
+  }
+  document.getElementById('sim-status').textContent = 'live';
+  document.getElementById('sim-status').className = 'live-badge';
+}
+
+// ── LLM plain-English explainer ─────────────────────────────────
+async function explainWithLLM() {
+  if (!lastVerifyResult) return;
+  const btn = document.getElementById('llm-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Calling Opus 4.8...';
+  // Remove any prior explanation
+  document.querySelectorAll('.llm-explanation').forEach(e => e.remove());
+  try {
+    const r = await fetch(API + '/v1/explain', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ verify_result: lastVerifyResult })
+    }).then(r => r.json());
+    const div = document.createElement('div');
+    div.className = 'llm-explanation';
+    if (r.error) {
+      div.innerHTML = '<div class="badge">LLM error</div>' + (r.detail || r.error);
+    } else {
+      div.innerHTML = '<div class="badge">✨ Plain English — ' + (r.model || 'LLM') + '</div>' + r.explanation;
+    }
+    document.getElementById('results').appendChild(div);
+  } catch (e) {
+    alert('LLM call failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Explain in plain English';
+  }
+}
+
+function copyJson() {
+  if (!lastVerifyResult) return;
+  navigator.clipboard.writeText(JSON.stringify(lastVerifyResult, null, 2));
+  alert('Verify result JSON copied to clipboard.');
+}
+
+// ── Walk-in / new patient lookup (triggers exception engine when not found) ──
+function setLookupTab(which) {
+  document.getElementById('lookup-known').style.display = which === 'known' ? 'block' : 'none';
+  document.getElementById('lookup-walkin').style.display = which === 'walkin' ? 'block' : 'none';
+  document.getElementById('tab-known').style.background = which === 'known' ? 'var(--shade)' : 'transparent';
+  document.getElementById('tab-walkin').style.background = which === 'walkin' ? 'var(--shade)' : 'transparent';
+  document.getElementById('patient-info').innerHTML = '';
+}
+async function lookupWalkin() {
+  const body = {
+    member_id: document.getElementById('walkin-member').value.trim() || undefined,
+    first_name: document.getElementById('walkin-first').value.trim() || undefined,
+    last_name: document.getElementById('walkin-last').value.trim() || undefined,
+    date_of_birth: document.getElementById('walkin-dob').value.trim() || undefined,
+    payer_id: document.getElementById('walkin-payer').value.trim() || undefined,
+  };
+  const info = document.getElementById('patient-info');
+  info.innerHTML = '<div class="placeholder"><span class="spinner"></span> Looking up...</div>';
+  const r = await fetch(API + '/v1/eligibility', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(r => r.json());
+  if (r.verification?.status === 'MEMBER_NOT_FOUND') {
+    // Show the exception action plan inline
+    info.innerHTML = '<div style="padding:10px;background:#fee2e2;border-radius:6px;font-size:13px;color:#991b1b;font-weight:600">⚠ MEMBER_NOT_FOUND</div>';
+    renderExceptions(r.exceptions || [], { source: 'eligibility', query: body });
+  } else if (r.patient) {
+    // Found — set the dropdown to this patient + populate
+    info.innerHTML = '<div style="padding:8px;background:#dcfce7;border-radius:6px;font-size:13px;color:#166534;font-weight:600">✓ Found: ' + r.patient.first_name + ' ' + r.patient.last_name + ' (' + r.patient.patient_id + ')</div>';
+    document.getElementById('patient-select').value = r.patient.patient_id;
+    document.getElementById('patient-select').dispatchEvent(new Event('change'));
+  }
+}
+
+// ── Action Center (exception → action plan) ──────────────────────
+function renderExceptions(exceptions, context) {
+  const out = document.getElementById('results');
+  if (!exceptions || exceptions.length === 0) {
+    if (context && context.source === 'verify') return; // no exceptions on verify is normal
+    return;
+  }
+  let html = '<div style="margin-bottom:14px;font-size:14px;font-weight:600">⚠ ' + exceptions.length + ' exception' + (exceptions.length > 1 ? 's' : '') + ' requiring action</div>';
+  for (let i = 0; i < exceptions.length; i++) {
+    const e = exceptions[i];
+    html += '<div class="exception-card severity-' + e.severity + '">' +
+      '<div><span class="code">' + e.code + '</span> ' +
+      '<span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-left:8px">severity: ' + e.severity + '</span></div>' +
+      '<div class="summary">' + e.summary + '</div>';
+    if (e.affected_ada_code) html += '<div style="font-size:11px;color:var(--muted)">Affected procedure: <code>' + e.affected_ada_code + '</code></div>';
+    if (e.candidate_patient_id) html += '<div style="font-size:11px;color:var(--muted)">Candidate match: <code>' + e.candidate_patient_id + '</code> — <a href="#" onclick="event.preventDefault();document.getElementById(\'patient-select\').value=\'' + e.candidate_patient_id + '\';document.getElementById(\'patient-select\').dispatchEvent(new Event(\'change\'));">use this patient</a></div>';
+    html += '<div style="font-size:11px;color:var(--muted);margin-top:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Recommended actions:</div>';
+    for (let j = 0; j < (e.action_plan || []).length; j++) {
+      const a = e.action_plan[j];
+      if (!a) continue;
+      html += '<div class="action-tile">' +
+        '<div><span class="channel-pill channel-' + a.channel + '">' + a.channel.replace('_', ' ') + '</span>' +
+        '<span class="subject">' + a.subject + '</span></div>';
+      if (a.body) html += '<div class="preview">' + escapeHtml(a.body) + '</div>';
+      if (a.script) {
+        html += '<details style="margin-top:6px"><summary style="font-size:12px;color:var(--accent);cursor:pointer">View call script (' + a.script.length + ' steps)</summary>';
+        html += '<ol class="script-list">';
+        for (const line of a.script) html += '<li>' + escapeHtml(line) + '</li>';
+        html += '</ol></details>';
+      }
+      if (a.phone) html += '<div style="font-size:11px;color:var(--muted);margin-top:4px">📞 ' + a.phone + '</div>';
+      html += '<div class="actions">' +
+        '<button onclick="executeAction(' + i + ',' + j + ')">Execute</button>' +
+        (a.channel === 'call' || a.channel === 'insurance_call'
+          ? '<button class="secondary" onclick="copyScript(' + i + ',' + j + ')">Copy script</button>' : '') +
+        (a.channel === 'sms'
+          ? '<button class="secondary" onclick="copyBody(' + i + ',' + j + ')">Copy SMS body</button>' : '') +
+        '</div></div>';
+    }
+    html += '</div>';
+  }
+  out.innerHTML = html + (out.innerHTML.includes('exception-card') ? '' : ''); // append-safe
+  // Store for action handlers
+  window._lastExceptions = exceptions;
+  window._exceptionContext = context;
+  document.getElementById('actions').style.display = 'flex';
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function executeAction(excIdx, actIdx) {
+  const exc = window._lastExceptions[excIdx];
+  const action = exc.action_plan[actIdx];
+  const ctx = window._exceptionContext || {};
+  const r = await fetch(API + '/v1/exceptions/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action, exception_code: exc.code,
+      patient_id: lastVerifyResult?.patient?.patient_id || (ctx.query?.first_name + '_' + ctx.query?.last_name) || null,
+      context: ctx
+    })
+  }).then(r => r.json());
+  showModal('Action sent — receipt', JSON.stringify(r, null, 2));
+}
+function copyScript(excIdx, actIdx) {
+  const a = window._lastExceptions[excIdx].action_plan[actIdx];
+  navigator.clipboard.writeText((a.script || []).join('\n'));
+  alert('Call script copied to clipboard.');
+}
+function copyBody(excIdx, actIdx) {
+  const a = window._lastExceptions[excIdx].action_plan[actIdx];
+  navigator.clipboard.writeText(a.body || '');
+  alert('SMS body copied to clipboard.');
+}
+function showModal(title, body) {
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.onclick = () => bg.remove();
+  bg.innerHTML = '<div class="modal" onclick="event.stopPropagation()"><h3>' + escapeHtml(title) + '</h3><pre>' + escapeHtml(body) + '</pre><div style="margin-top:14px;text-align:right"><button onclick="this.closest(\'.modal-bg\').remove()">Close</button></div></div>';
+  document.body.appendChild(bg);
+}
+
+// auto-add a starter row
+addAdaRow();
+</script>
+</body>
+</html>

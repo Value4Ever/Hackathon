@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Clinic Scheduler · SPC Dashboard</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b;
+    --accent: #0ea5e9; --accent-dark: #0284c7;
+    --good: #16a34a; --warn: #d97706; --bad: #dc2626;
+    --shade: #f1f5f9;
+    --low-bg: #dcfce7; --low-text: #166534;
+    --moderate-bg: #fef3c7; --moderate-text: #92400e;
+    --high-bg: #fed7aa; --high-text: #9a3412;
+    --critical-bg: #fee2e2; --critical-text: #991b1b;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.04);
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:0; background: var(--bg); color: var(--text); font: 13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; }
+  header { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; padding: 16px 22px; display:flex; justify-content:space-between; align-items:center; }
+  header h1 { margin:0; font-size:20px; font-weight:700; }
+  header .sub { font-size:12px; opacity:0.88; margin-top:3px; }
+  header nav a { color:white; text-decoration:none; padding:6px 12px; border-radius:6px; margin-left:6px; font-size:12px; opacity:0.85; }
+  header nav a:hover { background: rgba(255,255,255,0.15); opacity:1; }
+  header nav a.active { background: rgba(255,255,255,0.22); font-weight:700; opacity:1; }
+  .layout { display: grid; grid-template-columns: 1fr 480px; gap: 20px; padding: 20px; max-width: 1800px; margin: 0 auto; }
+  .card { background: var(--card); border-radius:10px; box-shadow: var(--shadow-card); padding: 18px; margin-bottom: 14px; }
+  .card h2 { margin:0 0 14px; font-size:11px; font-weight:700; color: var(--muted); text-transform:uppercase; letter-spacing:0.8px; display:flex; align-items:center; gap:8px; }
+
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .stat-card { background: var(--shade); padding: 14px; border-radius: 8px; }
+  .stat-card .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight:700; }
+  .stat-card .val { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .stat-card.critical .val { color: var(--bad); }
+  .stat-card.high .val { color: #ea580c; }
+  .stat-card.moderate .val { color: var(--warn); }
+
+  .filters { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+  .filters button { background: var(--shade); color: var(--text); border:0; border-radius:6px; padding:6px 12px; font-size:12px; cursor:pointer; font-weight:600; }
+  .filters button.active { background: var(--accent); color: white; }
+  .filters .label { font-size:11px; color: var(--muted); text-transform:uppercase; font-weight:700; letter-spacing:0.5px; margin-right:6px; }
+
+  table { width:100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align:left; padding: 8px 6px; border-bottom:1px solid var(--border); }
+  th { font-size: 10px; text-transform:uppercase; letter-spacing:0.5px; color: var(--muted); font-weight:700; cursor:pointer; }
+  tr.row-clickable:hover { background: var(--shade); cursor:pointer; }
+  tr.selected { background: #e0f2fe; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; }
+  .pill.low { background:var(--low-bg); color:var(--low-text); }
+  .pill.moderate { background:var(--moderate-bg); color:var(--moderate-text); }
+  .pill.high { background:var(--high-bg); color:var(--high-text); }
+  .pill.critical { background:var(--critical-bg); color:var(--critical-text); }
+  .pill.archetype { background: var(--shade); color: var(--text); }
+
+  /* SPC chart */
+  .spc-chart {
+    position: relative; height: 200px; background: linear-gradient(to bottom, #fee2e2 0%, #fee2e2 11.1%, #fed7aa 11.1%, #fed7aa 22.2%, #fef3c7 22.2%, #fef3c7 33.3%, #f0fdf4 33.3%, #f0fdf4 66.7%, #fef3c7 66.7%, #fef3c7 77.8%, #fed7aa 77.8%, #fed7aa 88.9%, #fee2e2 88.9%);
+    border: 1px solid var(--border); border-radius: 6px; padding: 8px 8px 24px;
+  }
+  .spc-chart .axis-y {
+    position: absolute; left: -28px; top: 8px; height: calc(100% - 32px);
+    display: flex; flex-direction: column; justify-content: space-between;
+    font-size: 9px; color: var(--muted);
+  }
+  .spc-chart .point {
+    position: absolute; width: 8px; height: 8px; border-radius: 50%;
+    transform: translate(-50%, 50%);
+  }
+  .spc-chart .point.missed { background: var(--bad); }
+  .spc-chart .point.kept { background: var(--good); }
+  .spc-chart .control-line {
+    position: absolute; left: 0; right: 0; height: 1px; background: rgba(0,0,0,0.4);
+    border-top: 1px dashed rgba(0,0,0,0.4);
+  }
+  .spc-chart .centerline { background: var(--accent); border-top: 2px solid var(--accent); }
+  .spc-chart .ucl-lcl { border-top: 1px dashed var(--bad); }
+  .spc-chart .label-zone {
+    position: absolute; right: 4px; font-size: 9px; padding: 0 4px;
+    background: rgba(255,255,255,0.85); border-radius: 3px;
+    color: var(--muted); font-weight: 700;
+  }
+
+  .we-finding { padding: 8px 10px; border-radius: 6px; margin: 6px 0; font-size: 12px; border-left: 4px solid; }
+  .we-finding.critical { background:#fee2e2; border-color:var(--bad); color:#7f1d1d; }
+  .we-finding.major { background:#fed7aa; border-color:#ea580c; color:#7c2d12; }
+  .we-finding.minor { background:#fef3c7; border-color:var(--warn); color:#78350f; }
+  .we-finding.info { background:#dbeafe; border-color:var(--accent); color:#1e3a8a; }
+  .we-finding .rule { display:inline-block; padding:1px 6px; background:white; border-radius:3px; font-size:10px; font-weight:700; margin-right:6px; }
+
+  .touchpoint { background: white; border:1px solid var(--border); border-radius:6px; padding:10px; margin:6px 0; }
+  .touchpoint .when { display:inline-block; background:var(--accent); color:white; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; }
+  .touchpoint .channel-pill { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; color:white; margin-left:4px; }
+  .channel-sms { background:#06b6d4; } .channel-call { background:#8b5cf6; } .channel-email { background:#16a34a; } .channel-voicemail { background:#8b5cf6; opacity:0.7; }
+  .touchpoint .body { font-size:12px; margin-top:6px; color: var(--text); white-space: pre-wrap; }
+  .touchpoint .script { font-size:12px; margin-top:6px; }
+  .touchpoint .script ol { margin: 4px 0; padding-left: 20px; }
+  .touchpoint .script li { margin: 3px 0; }
+
+  button.primary { background: var(--accent); color:white; border:0; border-radius:6px; padding:8px 14px; font-weight:600; cursor:pointer; }
+  button.primary:hover { background: var(--accent-dark); }
+  button.ghost { background: transparent; color: var(--accent); border:0; padding:4px 8px; cursor:pointer; font-weight:600; }
+
+  .placeholder { color: var(--muted); padding: 30px 0; text-align: center; font-style: italic; }
+  .spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--shade); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>📊 Clinic Scheduler · SPC Dashboard</h1>
+    <div class="sub">Risk-stratified no-show prediction · Western Electric Rules · Auto outreach</div>
+  </div>
+  <nav>
+    <a href="/">Eligibility Verifier</a>
+    <a href="/ui/clinic.html" class="active">Clinic Scheduler</a>
+  </nav>
+</header>
+
+<div class="layout">
+  <!-- LEFT: stats + patient list -->
+  <div>
+    <div class="card">
+      <h2>Clinic-wide stats</h2>
+      <div class="stats" id="stats">
+        <div class="placeholder"><span class="spinner"></span> Loading...</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Patients · ranked by no-show risk (SPC + WE rules)</h2>
+      <div class="filters">
+        <span class="label">Filter:</span>
+        <button class="active" data-band="" onclick="setBand('')">All</button>
+        <button data-band="critical" onclick="setBand('critical')">Critical</button>
+        <button data-band="high" onclick="setBand('high')">High</button>
+        <button data-band="moderate" onclick="setBand('moderate')">Moderate</button>
+        <button data-band="low" onclick="setBand('low')">Low</button>
+        <span style="margin-left:auto;font-size:12px;color:var(--muted)" id="row-count"></span>
+      </div>
+      <div style="max-height:600px;overflow-y:auto">
+        <table id="patient-table">
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>Risk</th><th class="num">Score</th><th class="num">p̄</th><th class="num">n</th><th>WE Rules</th><th>Archetype</th><th>Channel</th></tr>
+          </thead>
+          <tbody id="patient-tbody">
+            <tr><td colspan="9" class="placeholder"><span class="spinner"></span> Loading patients...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="primary" onclick="runBatchCampaign(50)">🚀 Run batch outreach campaign (top 50)</button>
+        <button class="ghost" onclick="runBatchCampaign(200)">All critical+high</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: detail panel -->
+  <div>
+    <div class="card" id="detail-card">
+      <h2>Patient detail · SPC chart · outreach campaign</h2>
+      <div id="detail">
+        <div class="placeholder">Click a patient on the left to view SPC chart, WE rules, and auto-generated outreach campaign.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let allPatients = [];
+let currentBand = '';
+let selectedPatientId = null;
+
+async function init() {
+  const stats = await fetch('/v1/clinic/stats').then(r=>r.json());
+  renderStats(stats);
+  await loadPatients();
+}
+document.addEventListener('DOMContentLoaded', init);
+
+function renderStats(s) {
+  const noShowPct = (100 * s.appts_no_show / s.appts_total).toFixed(1);
+  const cancelPct = (100 * s.appts_cancelled_same_day / s.appts_total).toFixed(1);
+  const critArch = (s.archetypes.find(a => a.risk_archetype==='chronic')?.n || 0);
+  const problemArch = (s.archetypes.find(a => a.risk_archetype==='problem')?.n || 0);
+  document.getElementById('stats').innerHTML =
+    statCard('Total patients', s.patients) +
+    statCard('Total appts', s.appts_total.toLocaleString()) +
+    statCard('No-show rate', noShowPct + '%', 'high') +
+    statCard('Chronic + Problem', (critArch + problemArch).toLocaleString(), 'critical') +
+    statCard('Outstanding AR', '$' + Math.round(s.outstanding_payments.t || 0).toLocaleString(), 'moderate');
+}
+function statCard(lbl, val, cls) {
+  return '<div class="stat-card ' + (cls||'') + '"><div class="lbl">' + lbl + '</div><div class="val">' + val + '</div></div>';
+}
+
+async function loadPatients() {
+  const q = currentBand ? '?band=' + currentBand : '';
+  const r = await fetch('/v1/clinic/patients' + q).then(r=>r.json());
+  allPatients = r.patients || [];
+  document.getElementById('row-count').textContent = allPatients.length + ' patients';
+  renderTable();
+}
+
+function setBand(b) {
+  currentBand = b;
+  for (const btn of document.querySelectorAll('.filters button[data-band]')) {
+    btn.classList.toggle('active', btn.dataset.band === b);
+  }
+  loadPatients();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('patient-tbody');
+  const top = allPatients.slice(0, 200);
+  tbody.innerHTML = top.map(p =>
+    '<tr class="row-clickable ' + (p.patient_id === selectedPatientId ? 'selected' : '') + '" onclick="selectPatient(\'' + p.patient_id + '\')">' +
+    '<td>' + p.patient_id + '</td>' +
+    '<td><b>' + p.name + '</b></td>' +
+    '<td><span class="pill ' + p.risk_band + '">' + p.risk_band + '</span></td>' +
+    '<td class="num">' + (p.risk_score*100).toFixed(0) + '%</td>' +
+    '<td class="num">' + (p.p_bar*100).toFixed(0) + '%</td>' +
+    '<td class="num">' + p.n + '</td>' +
+    '<td><b>' + p.we_rules_count + '</b>' + (p.we_critical_count > 0 ? ' <span class="pill critical">' + p.we_critical_count + ' crit</span>' : '') + '</td>' +
+    '<td><span class="pill archetype">' + p.archetype + '</span></td>' +
+    '<td>' + p.channel + '</td>' +
+    '</tr>'
+  ).join('');
+}
+
+async function selectPatient(pid) {
+  selectedPatientId = pid;
+  renderTable();
+  const detail = document.getElementById('detail');
+  detail.innerHTML = '<div class="placeholder"><span class="spinner"></span> Loading SPC analysis + outreach campaign...</div>';
+  const [spc, camp] = await Promise.all([
+    fetch('/v1/clinic/patients/' + pid).then(r=>r.json()),
+    fetch('/v1/clinic/patients/' + pid + '/campaign').then(r=>r.json())
+  ]);
+  renderDetail(spc, camp);
+}
+
+function renderDetail(spc, camp) {
+  const p = spc.patient || {};
+  let html = '<div style="margin-bottom:12px"><b style="font-size:16px">' + p.first_name + ' ' + p.last_name + '</b> (' + p.patient_id + ') · ' + (p.age || '?') + 'y · <span class="pill ' + (camp.risk_band || 'low') + '">' + (camp.risk_band || 'low') + ' risk</span> · <span class="pill archetype">' + (p.risk_archetype || '') + '</span></div>';
+
+  html += '<div style="font-size:12px;color:var(--muted);margin-bottom:14px">' +
+    '📱 ' + (p.phone || '?') + ' · ✉️ ' + (p.email || '?') + ' · prefers <b>' + (p.preferred_channel || '?') + '</b><br>' +
+    'Last cleaning: <b>' + (p.last_cleaning_date || 'never') + '</b> · recall interval: ' + (p.recall_interval_months || '?') + ' months · pending tx: $' + (camp.pending_treatment_value || 0).toFixed(0) +
+    '</div>';
+
+  // SPC chart
+  if (spc.series && spc.series.length > 0) {
+    html += '<h3 style="margin:14px 0 6px;font-size:13px">SPC p-chart · ' + spc.n + ' appointments analyzed</h3>';
+    html += '<div style="font-size:11px;color:var(--muted);margin-bottom:6px">' +
+      'p̄ (centerline) = <b>' + (spc.p_bar*100).toFixed(1) + '%</b> · ' +
+      'σ = ' + spc.sigma.toFixed(3) + ' · ' +
+      'UCL = ' + (spc.ucl*100).toFixed(0) + '% · LCL = ' + (spc.lcl*100).toFixed(0) + '%' +
+      '</div>';
+    html += renderSpcChart(spc);
+    html += '<div style="font-size:11px;color:var(--muted);margin-top:4px"><span style="color:var(--good)">●</span> attended &nbsp; <span style="color:var(--bad)">●</span> missed (no-show or same-day cancel)</div>';
+  }
+
+  // WE rule findings
+  if (spc.we_rules_triggered && spc.we_rules_triggered.length > 0) {
+    html += '<h3 style="margin:18px 0 6px;font-size:13px">⚠ Western Electric Rule findings (' + spc.we_rules_triggered.length + ')</h3>';
+    for (const f of spc.we_rules_triggered.slice(0, 8)) {
+      html += '<div class="we-finding ' + f.severity + '"><span class="rule">RULE ' + f.rule + '</span>' + f.description + '</div>';
+    }
+  } else {
+    html += '<div style="margin:14px 0;padding:10px;background:var(--low-bg);border-radius:6px;color:var(--low-text);font-size:12px"><b>✓ No Western Electric rule violations</b> — process is in statistical control.</div>';
+  }
+
+  // Risk-aware campaign
+  html += '<h3 style="margin:18px 0 6px;font-size:13px">📅 Auto-generated outreach campaign · ' + camp.n_touchpoints_planned + ' touchpoints · ' + camp.purpose + '</h3>';
+  if (camp.policy) {
+    html += '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Policy: priority <b>' + camp.policy.front_desk_priority + '</b>';
+    if (camp.policy.deposit_required) html += ' · deposit <b>' + camp.policy.deposit_amount_pct + '%</b> required';
+    if (camp.policy.confirmation_required) html += ' · confirmation required';
+    if (camp.policy.suggest_morning_slot) html += ' · suggest morning slot';
+    html += '</div>';
+  }
+  if (camp.n_touchpoints_skipped_optout > 0) {
+    html += '<div style="font-size:11px;color:var(--warn);margin-bottom:8px">⚠ ' + camp.n_touchpoints_skipped_optout + ' touchpoints skipped due to opt-out flags</div>';
+  }
+  for (const tp of camp.touchpoints) {
+    html += '<div class="touchpoint">' +
+      '<span class="when">' + tp.when + '</span>' +
+      '<span class="channel-pill channel-' + tp.channel + '">' + tp.channel + '</span>';
+    if (tp.subject) html += ' <b style="font-size:12px">' + escapeHtml(tp.subject) + '</b>';
+    if (tp.body) html += '<div class="body">' + escapeHtml(tp.body) + '</div>';
+    if (tp.script) {
+      html += '<div class="script"><b style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px">Call script:</b><ol>';
+      for (const line of tp.script) html += '<li>' + escapeHtml(line) + '</li>';
+      html += '</ol>';
+      if (tp.voicemail_fallback) {
+        html += '<details><summary style="font-size:11px;color:var(--accent);cursor:pointer">Voicemail fallback (if no answer)</summary><ol>';
+        for (const line of tp.voicemail_fallback) html += '<li>' + escapeHtml(line) + '</li>';
+        html += '</ol></details>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  document.getElementById('detail').innerHTML = html;
+}
+
+function renderSpcChart(spc) {
+  // Plot each point at x = i/(n-1)*100%, y = (1 - value/maxY)*100%
+  // We use 0..1 scale (Bernoulli); chart y-axis 0..1.
+  const n = spc.series.length;
+  if (n === 0) return '';
+  const maxY = 1;
+  const innerH = 180; // px
+
+  // Convert percent to y-position px
+  const yFor = (v) => (1 - v / maxY) * innerH;
+
+  let pointsHtml = '';
+  for (let i = 0; i < n; i++) {
+    const val = spc.series[i].missed;
+    const xPct = n === 1 ? 50 : (i / (n - 1)) * 100;
+    const yPx = yFor(val);
+    const cls = val === 1 ? 'missed' : 'kept';
+    pointsHtml += '<div class="point ' + cls + '" style="left:' + xPct + '%;top:' + yPx + 'px" title="appt ' + (i+1) + ': ' + (val === 1 ? 'missed' : 'kept') + ' · ' + spc.series[i].at.slice(0,10) + '"></div>';
+  }
+
+  // Control lines
+  const z = spc.zones;
+  const linesHtml =
+    '<div class="control-line ucl-lcl" style="top:' + yFor(z.upper_3s) + 'px"><span class="label-zone">UCL ' + (z.upper_3s*100).toFixed(0) + '%</span></div>' +
+    (z.upper_2s < z.upper_3s ? '<div class="control-line" style="top:' + yFor(z.upper_2s) + 'px"><span class="label-zone">+2σ</span></div>' : '') +
+    (z.upper_1s < z.upper_2s ? '<div class="control-line" style="top:' + yFor(z.upper_1s) + 'px"><span class="label-zone">+1σ</span></div>' : '') +
+    '<div class="control-line centerline" style="top:' + yFor(z.centerline) + 'px"><span class="label-zone">p̄ ' + (z.centerline*100).toFixed(0) + '%</span></div>' +
+    (z.lower_1s > 0 ? '<div class="control-line" style="top:' + yFor(z.lower_1s) + 'px"><span class="label-zone">-1σ</span></div>' : '') +
+    (z.lower_2s > 0 ? '<div class="control-line" style="top:' + yFor(z.lower_2s) + 'px"><span class="label-zone">-2σ</span></div>' : '') +
+    (z.lower_3s > 0 ? '<div class="control-line ucl-lcl" style="top:' + yFor(z.lower_3s) + 'px"><span class="label-zone">LCL ' + (z.lower_3s*100).toFixed(0) + '%</span></div>' : '');
+
+  return '<div class="spc-chart" style="margin-left:32px">' +
+    '<div class="axis-y"><div>100%</div><div>75%</div><div>50%</div><div>25%</div><div>0%</div></div>' +
+    linesHtml + pointsHtml +
+    '</div>';
+}
+
+async function runBatchCampaign(max) {
+  const detail = document.getElementById('detail');
+  detail.innerHTML = '<div class="placeholder"><span class="spinner"></span> Generating batch campaigns for top ' + max + ' priority patients...</div>';
+  const r = await fetch('/v1/clinic/schedule/batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ max })
+  }).then(r=>r.json());
+  let html = '<h3 style="margin:0 0 10px">✓ Batch campaign generated</h3>' +
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:14px">' + r.count + ' campaigns built · ranked by priority (risk_score + recall-due + pending tx)</div>';
+  const totalTouchpoints = r.campaigns.reduce((s, c) => s + c.n_touchpoints_planned, 0);
+  const byChannel = {};
+  for (const c of r.campaigns) for (const tp of c.touchpoints) byChannel[tp.channel] = (byChannel[tp.channel] || 0) + 1;
+  html += '<div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">' +
+    statCard('Touchpoints', totalTouchpoints) +
+    statCard('SMS', byChannel.sms || 0) +
+    statCard('Calls', byChannel.call || 0) +
+    '</div>';
+  html += '<table><thead><tr><th>Patient</th><th>Band</th><th>Purpose</th><th class="num">Pri</th><th class="num">Touchpoints</th></tr></thead><tbody>';
+  for (const c of r.campaigns.slice(0, 30)) {
+    html += '<tr class="row-clickable" onclick="selectPatient(\'' + c.patient.patient_id + '\')">' +
+      '<td><b>' + c.patient.name + '</b></td>' +
+      '<td><span class="pill ' + c.risk_band + '">' + c.risk_band + '</span></td>' +
+      '<td>' + c.purpose + '</td>' +
+      '<td class="num">' + c.priority.toFixed(2) + '</td>' +
+      '<td class="num">' + c.n_touchpoints_planned + '</td>' +
+      '</tr>';
+  }
+  html += '</tbody></table>';
+  if (r.campaigns.length > 30) html += '<div style="text-align:center;padding:10px;color:var(--muted);font-size:11px">… showing top 30 of ' + r.campaigns.length + ' total</div>';
+  detail.innerHTML = html;
+}
+
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
+</body>
+</html>

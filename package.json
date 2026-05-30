@@ -1,0 +1,35 @@
+{
+  "name": "bright-smile-dental-hackathon",
+  "version": "1.0.0",
+  "description": "Multi-agent dental front-desk MVP — inbound calls, insurance verification, SPC-driven scheduling, WhatsApp/SMS/voice outreach, HIPAA + 21 CFR Part 11 compliant. MT+ pattern.",
+  "main": "server.cjs",
+  "scripts": {
+    "setup": "node generateClinicData.cjs && node db.cjs",
+    "start": "node server.cjs",
+    "demo": "node lib/demoRunner.cjs --fast",
+    "spc": "node lib/spcEngine.cjs --top 20",
+    "schedule": "node lib/schedulerEngine.cjs --batch 20"
+  },
+  "keywords": [
+    "dental",
+    "insurance-verification",
+    "spc",
+    "western-electric-rules",
+    "multi-agent",
+    "hipaa",
+    "21-cfr-part-11",
+    "hackathon"
+  ],
+  "author": "Meridian Technologies IP Holdings (MT+ pattern)",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^11.5.0",
+    "docx": "^9.0.0",
+    "exceljs": "^4.4.0",
+    "archiver": "^7.0.0",
+    "adm-zip": "^0.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

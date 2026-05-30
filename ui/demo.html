@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Demo Theater · End-to-End</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b;
+    --accent: #0ea5e9; --good: #16a34a; --bad: #dc2626; --warn: #d97706; --purple: #8b5cf6;
+    --shade: #f1f5f9;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.04);
+    --wa-bg: #25d366; --sms-bg: #06b6d4; --voice-bg: #8b5cf6; --email-bg: #16a34a;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:0; background: var(--bg); color: var(--text); font: 13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; }
+  header { background: linear-gradient(135deg,#0f172a 0%,#1e293b 100%); color:white; padding: 18px 24px; display:flex; justify-content:space-between; align-items:center; }
+  header h1 { margin:0; font-size:20px; font-weight:700; }
+  header .sub { font-size:12px; opacity:0.75; margin-top:3px; }
+  header nav a { color:white; text-decoration:none; padding:6px 12px; border-radius:6px; margin-left:6px; font-size:12px; opacity:0.7; }
+  header nav a:hover, header nav a.active { background: rgba(255,255,255,0.15); opacity:1; }
+
+  .layout { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px; padding:16px; max-width:1700px; margin:0 auto; }
+  .card { background:var(--card); border-radius:10px; padding:16px; box-shadow:var(--shadow-card); display:flex; flex-direction:column; }
+  .card h2 { margin:0 0 12px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; }
+
+  .controls { background: var(--card); border-radius: 10px; padding: 16px; box-shadow: var(--shadow-card); margin: 16px; display:flex; gap:10px; align-items:center; }
+  button.primary { background: var(--accent); color:white; border:0; border-radius:6px; padding:10px 20px; font-size:13px; font-weight:700; cursor:pointer; }
+  button.primary:hover { background: #0284c7; }
+  button.primary:disabled { background: var(--muted); cursor: not-allowed; }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-size: 12px; cursor: pointer; font-weight: 600; }
+  .speed-pick { display:flex; gap:4px; }
+  .speed-pick button { background: var(--shade); border:0; border-radius:4px; padding:5px 10px; font-size:11px; cursor:pointer; font-weight:600; }
+  .speed-pick button.active { background: var(--accent); color: white; }
+
+  /* Step timeline */
+  .timeline { max-height: 700px; overflow-y: auto; padding-right: 4px; }
+  .step {
+    border-left: 3px solid var(--border); padding: 12px 14px; margin: 8px 0;
+    background: var(--shade); border-radius: 0 8px 8px 0; transition: all 0.3s;
+  }
+  .step.active { border-left-color: var(--accent); background: #e0f2fe; }
+  .step.done { border-left-color: var(--good); background: #f0fdf4; }
+  .step.error { border-left-color: var(--bad); background: #fef2f2; }
+  .step .scene { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .step .title { font-size: 13px; font-weight: 700; margin-top: 4px; }
+  .step .desc { font-size: 12px; color: var(--text); margin-top: 4px; line-height: 1.45; }
+  .step .result { font-size: 11px; color: var(--muted); font-family: ui-monospace,Menlo,monospace; margin-top: 6px; max-height: 60px; overflow: hidden; }
+  .step .num {
+    display:inline-block; background: var(--muted); color: white; width: 22px; height: 22px;
+    border-radius: 50%; text-align: center; line-height: 22px; font-weight: 700; font-size: 11px;
+    margin-right: 8px;
+  }
+  .step.active .num { background: var(--accent); animation: pulse 1s ease-in-out infinite; }
+  .step.done .num { background: var(--good); }
+  .step.error .num { background: var(--bad); }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+  /* Messages stream */
+  .messages { max-height: 700px; overflow-y: auto; padding-right: 4px; }
+  .msg {
+    padding: 10px 12px; margin: 6px 0; border-radius: 8px;
+    font-size: 12px; line-height: 1.45;
+    border-left: 4px solid;
+  }
+  .msg.whatsapp { background: #f0fdf4; border-color: var(--wa-bg); }
+  .msg.sms { background: #ecfeff; border-color: var(--sms-bg); }
+  .msg.voice { background: #faf5ff; border-color: var(--voice-bg); }
+  .msg.email { background: #f0fdf4; border-color: var(--email-bg); }
+  .msg.consent_blocked { background: #fee2e2; border-color: var(--bad); }
+  .msg .meta { font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .msg .channel-pill {
+    display:inline-block; padding: 1px 7px; border-radius: 4px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px; color: white; font-size: 9px;
+  }
+  .msg .channel-pill.whatsapp { background: var(--wa-bg); }
+  .msg .channel-pill.sms { background: var(--sms-bg); }
+  .msg .channel-pill.voice { background: var(--voice-bg); }
+  .msg .channel-pill.email { background: var(--email-bg); }
+  .msg .audience { display: inline-block; padding: 1px 6px; border-radius: 4px; background: var(--shade); color: var(--text); font-weight: 600; font-size: 10px; margin-left: 4px; }
+  .msg .body { white-space: pre-wrap; word-wrap: break-word; }
+  .msg .status { font-size: 10px; color: var(--muted); margin-top: 4px; }
+  .msg .status.delivered { color: var(--good); }
+  .msg .status.read { color: var(--good); font-weight: 700; }
+  .msg .status.failed { color: var(--bad); }
+
+  /* Live KPI panel */
+  .kpis-live { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi-live { background: var(--shade); padding: 12px; border-radius: 8px; }
+  .kpi-live .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+  .kpi-live .val { font-size: 24px; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .kpi-live.good .val { color: var(--good); }
+  .kpi-live.warn .val { color: var(--warn); }
+  .kpi-live.critical .val { color: var(--bad); }
+
+  .progress-bar { height: 6px; background: var(--shade); border-radius: 3px; overflow: hidden; margin: 10px 0; }
+  .progress-bar .fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--good)); transition: width 0.4s; }
+
+  .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; }
+  .badge.running { background:#dbeafe; color:#1e40af; }
+  .badge.complete { background:#dcfce7; color:#166534; }
+  .placeholder { color:var(--muted); padding:30px 0; text-align:center; font-style:italic; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🎬 Demo Theater · End-to-End</h1>
+    <div class="sub">Live walkthrough — outbound calls, insurance verification w/ retry loop, inbound call orchestration, WhatsApp/SMS/voice to patients/staff/doctor</div>
+  </div>
+  <nav>
+    <a href="/">Hub</a>
+    <a href="/verifier">Verifier</a>
+    <a href="/clinic">Scheduler</a>
+    <a href="/inbound">Inbound</a>
+    <a href="/demo" class="active">Demo</a>
+  </nav>
+</header>
+
+<div class="controls">
+  <button class="primary" id="play-btn" onclick="playDemo()">▶ Play End-to-End Demo</button>
+  <div class="speed-pick">
+    <span style="font-size:11px;color:var(--muted);align-self:center;margin-right:6px">Speed:</span>
+    <button data-speed="fast" class="active" onclick="setSpeed('fast')">Fast (3s)</button>
+    <button data-speed="normal" onclick="setSpeed('normal')">Normal (15s)</button>
+    <button data-speed="slow" onclick="setSpeed('slow')">Slow (45s)</button>
+  </div>
+  <span id="demo-status" style="margin-left:auto;font-size:12px;color:var(--muted)"></span>
+  <button class="ghost" onclick="resetDemo()">Reset</button>
+</div>
+
+<div class="layout">
+  <!-- LEFT: 18-step timeline -->
+  <div class="card">
+    <h2>📋 Scripted timeline · 18 steps</h2>
+    <div class="timeline" id="timeline">
+      <div class="placeholder"><span class="spinner"></span> Loading script...</div>
+    </div>
+  </div>
+
+  <!-- MIDDLE: live messages -->
+  <div class="card">
+    <h2>💬 Live message stream · all channels</h2>
+    <div class="messages" id="messages">
+      <div class="placeholder">Click <b>Play</b> to start the demo.</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: live KPIs + agent state -->
+  <div class="card">
+    <h2>📊 Live KPIs</h2>
+    <div class="kpis-live">
+      <div class="kpi-live"><div class="lbl">Steps run</div><div class="val" id="kpi-steps">0</div></div>
+      <div class="kpi-live good"><div class="lbl">Messages sent</div><div class="val" id="kpi-messages">0</div></div>
+      <div class="kpi-live"><div class="lbl">WhatsApp</div><div class="val" id="kpi-whatsapp">0</div></div>
+      <div class="kpi-live"><div class="lbl">SMS</div><div class="val" id="kpi-sms">0</div></div>
+      <div class="kpi-live warn"><div class="lbl">Voice</div><div class="val" id="kpi-voice">0</div></div>
+      <div class="kpi-live good"><div class="lbl">Patient touchpts</div><div class="val" id="kpi-patient">0</div></div>
+      <div class="kpi-live"><div class="lbl">Staff alerts</div><div class="val" id="kpi-staff">0</div></div>
+      <div class="kpi-live critical"><div class="lbl">Escalations</div><div class="val" id="kpi-escalations">0</div></div>
+    </div>
+    <div class="progress-bar"><div class="fill" id="progress-fill" style="width:0%"></div></div>
+
+    <h2 style="margin-top:18px">🎭 Current scene</h2>
+    <div id="current-scene" style="font-size:13px;line-height:1.5;color:var(--text);min-height:60px">
+      <span class="placeholder">Demo idle.</span>
+    </div>
+
+    <h2 style="margin-top:18px">⚙ Agents fired this run</h2>
+    <div id="agents-fired" style="font-size:11px;color:var(--muted);line-height:1.6">—</div>
+  </div>
+</div>
+
+<script>
+let demoSpeed = 'fast';
+let script = [];
+let messagePollInterval = null;
+let demoStartTime = 0;
+
+async function init() {
+  const r = await fetch('/v1/demo/script').then(r=>r.json());
+  script = r.steps || [];
+  renderTimeline();
+}
+document.addEventListener('DOMContentLoaded', init);
+
+function setSpeed(s) {
+  demoSpeed = s;
+  document.querySelectorAll('.speed-pick button').forEach(b => b.classList.toggle('active', b.dataset.speed === s));
+}
+
+function renderTimeline() {
+  const div = document.getElementById('timeline');
+  if (script.length === 0) { div.innerHTML = '<div class="placeholder">Script not loaded.</div>'; return; }
+  div.innerHTML = script.map(s =>
+    '<div class="step" id="step-' + s.step + '">' +
+      '<div class="scene"><span class="num">' + s.step + '</span>' + escapeHtml(s.scene) + '</div>' +
+      '<div class="title">' + escapeHtml(s.title) + '</div>' +
+      '<div class="desc">' + escapeHtml(s.description) + '</div>' +
+      '<div class="result" id="step-result-' + s.step + '"></div>' +
+    '</div>'
+  ).join('');
+}
+
+async function playDemo() {
+  const btn = document.getElementById('play-btn');
+  btn.disabled = true; btn.textContent = '▶ Playing...';
+  document.getElementById('demo-status').innerHTML = '<span class="badge running">running</span> speed=' + demoSpeed;
+  document.getElementById('messages').innerHTML = '<div class="placeholder">Watching live message stream...</div>';
+  demoStartTime = Date.now();
+
+  // Poll the messaging log every 500ms for live updates
+  messagePollInterval = setInterval(updateMessages, 500);
+
+  // Highlight steps as they progress (simulated since the API runs all steps server-side)
+  const stepDelay = demoSpeed === 'fast' ? 200 : demoSpeed === 'normal' ? 850 : 2500;
+  const highlightAnimation = (async () => {
+    for (let i = 1; i <= script.length; i++) {
+      // Mark previous done
+      if (i > 1) {
+        const prev = document.getElementById('step-' + (i-1));
+        if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
+      }
+      const el = document.getElementById('step-' + i);
+      if (el) { el.classList.add('active'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      document.getElementById('kpi-steps').textContent = i;
+      document.getElementById('progress-fill').style.width = (i / script.length * 100) + '%';
+      const s = script.find(x => x.step === i);
+      if (s) document.getElementById('current-scene').innerHTML = '<b>' + escapeHtml(s.title) + '</b><div style="font-size:11px;color:var(--muted);margin-top:4px">' + escapeHtml(s.scene) + '</div>';
+      await sleep(stepDelay);
+    }
+    const last = document.getElementById('step-' + script.length);
+    if (last) { last.classList.remove('active'); last.classList.add('done'); }
+  })();
+
+  // Run the demo server-side
+  const r = await fetch('/v1/demo/run', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ speed: demoSpeed })
+  }).then(r=>r.json()).catch(e => ({ error: e.message }));
+
+  await highlightAnimation;
+  clearInterval(messagePollInterval);
+  await updateMessages();
+  computeAgents(r.results);
+
+  btn.disabled = false; btn.textContent = '▶ Play End-to-End Demo';
+  document.getElementById('demo-status').innerHTML = '<span class="badge complete">complete</span> ' + (r.steps_run || 0) + ' steps · ' + ((Date.now() - demoStartTime)/1000).toFixed(1) + 's elapsed';
+  document.getElementById('current-scene').innerHTML = '<b>✓ Demo complete</b><div style="font-size:11px;color:var(--muted);margin-top:4px">' + (r.steps_run||0) + ' steps ran end-to-end. Scroll left panel to review each.</div>';
+}
+
+function resetDemo() {
+  document.querySelectorAll('.step').forEach(s => { s.classList.remove('active','done','error'); });
+  document.querySelectorAll('.kpi-live .val').forEach(v => v.textContent = '0');
+  document.getElementById('progress-fill').style.width = '0%';
+  document.getElementById('messages').innerHTML = '<div class="placeholder">Click <b>Play</b> to start the demo.</div>';
+  document.getElementById('current-scene').innerHTML = '<span class="placeholder">Demo idle.</span>';
+  document.getElementById('agents-fired').textContent = '—';
+  document.getElementById('demo-status').textContent = '';
+}
+
+async function updateMessages() {
+  const r = await fetch('/v1/demo/messages?limit=50').then(r=>r.json()).catch(e=>({messages:[]}));
+  const div = document.getElementById('messages');
+  const messages = (r.messages || []).filter(m => new Date(m.sent_at).getTime() >= demoStartTime).reverse();
+  if (messages.length === 0) { div.innerHTML = '<div class="placeholder">Watching live message stream...</div>'; return; }
+  div.innerHTML = messages.map(m =>
+    '<div class="msg ' + (m.status === 'blocked_no_consent' ? 'consent_blocked' : m.channel) + '">' +
+    '<div class="meta">' +
+      '<span><span class="channel-pill ' + m.channel + '">' + (m.channel === 'whatsapp' ? '💚 WhatsApp' : m.channel === 'sms' ? '💬 SMS' : m.channel === 'voice' ? '📞 Voice' : '✉️ Email') + '</span>' +
+      '<span class="audience">→ ' + (m.audience || 'patient') + '</span></span>' +
+      '<span>' + new Date(m.sent_at).toLocaleTimeString() + '</span>' +
+    '</div>' +
+    '<div class="body">' + escapeHtml(m.body || m.subject || '') + '</div>' +
+    '<div class="status ' + m.status + '">→ ' + m.status + (m.delivered_at ? ' · delivered ' + new Date(m.delivered_at).toLocaleTimeString() : '') + (m.read_at ? ' · read' : '') + (m.consent_check_reason ? ' · BLOCKED: ' + m.consent_check_reason : '') + '</div>' +
+    '</div>'
+  ).join('');
+
+  // Update KPIs
+  const byChannel = { whatsapp: 0, sms: 0, voice: 0, email: 0 };
+  const byAudience = { patient: 0, staff: 0, doctor: 0, office_mgr: 0 };
+  for (const m of messages) {
+    if (byChannel[m.channel] !== undefined) byChannel[m.channel]++;
+    if (m.audience && byAudience[m.audience] !== undefined) byAudience[m.audience]++;
+  }
+  document.getElementById('kpi-messages').textContent = messages.length;
+  document.getElementById('kpi-whatsapp').textContent = byChannel.whatsapp;
+  document.getElementById('kpi-sms').textContent = byChannel.sms;
+  document.getElementById('kpi-voice').textContent = byChannel.voice;
+  document.getElementById('kpi-patient').textContent = byAudience.patient;
+  document.getElementById('kpi-staff').textContent = byAudience.staff + byAudience.office_mgr;
+  // Escalations = step 17 occurrence
+  const escalations = messages.filter(m => m.purpose === 'human_escalation').length;
+  document.getElementById('kpi-escalations').textContent = escalations;
+}
+
+function computeAgents(results) {
+  if (!results) return;
+  const agents = new Set();
+  for (const e of results) {
+    if (e.title.match(/Intake Agent/i)) agents.add('Intake Agent');
+    if (e.title.match(/Insurance Agent|verification|270 request/i)) agents.add('Insurance Agent');
+    if (e.title.match(/Cost Estimate/i)) agents.add('Cost Estimate Agent');
+    if (e.title.match(/Scheduling/i)) agents.add('Scheduling Agent');
+    if (e.title.match(/Confirmation/i)) agents.add('Confirmation');
+    if (e.title.match(/escalation|HUMAN/i)) agents.add('Human Escalation');
+    if (e.title.match(/voice|voicemail|outbound/i)) agents.add('Outbound Voice');
+    if (e.title.match(/WhatsApp|Doctor/i)) agents.add('WhatsApp Channel');
+  }
+  document.getElementById('agents-fired').innerHTML = Array.from(agents).map(a => '<div>✓ ' + escapeHtml(a) + '</div>').join('');
+}
+
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>

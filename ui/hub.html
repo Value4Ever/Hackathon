@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Bright Smile Dental · Front-Desk Hub</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b;
+    --accent: #0ea5e9; --accent-dark: #0284c7;
+    --good: #16a34a; --warn: #d97706; --bad: #dc2626; --purple: #8b5cf6;
+    --shade: #f1f5f9;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.04);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+    --grad-intake: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+    --grad-insurance: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
+    --grad-cost: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    --grad-schedule: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:0; background: var(--bg); color: var(--text); font: 14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; }
+  header { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; padding: 20px 28px; }
+  header .top { display:flex; justify-content:space-between; align-items:center; }
+  header h1 { margin:0; font-size:22px; font-weight:700; }
+  header .sub { font-size:13px; opacity:0.88; margin-top:4px; }
+  header .meta { text-align:right; font-size:12px; opacity:0.85; }
+
+  .layout { max-width: 1600px; margin: 0 auto; padding: 24px; }
+  .section-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin: 18px 0 10px; }
+
+  /* KPI strip */
+  .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+  .kpi { background: var(--card); border-radius:10px; padding: 16px; box-shadow: var(--shadow-card); }
+  .kpi .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight:700; }
+  .kpi .val { font-size: 26px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .kpi.critical .val { color: var(--bad); }
+  .kpi.warn .val { color: var(--warn); }
+  .kpi.good .val { color: var(--good); }
+
+  /* Decision flow diagram */
+  .flow {
+    background: var(--card); border-radius: 12px; padding: 22px;
+    box-shadow: var(--shadow-card); margin-bottom: 18px;
+  }
+  .flow h2 { margin: 0 0 16px; font-size: 16px; font-weight: 700; }
+  .flow-diagram {
+    display: grid; grid-template-columns: 100px 1fr 1fr 1fr 1fr 100px; gap: 12px;
+    align-items: center;
+  }
+  .flow-node {
+    position: relative; padding: 14px 12px; border-radius: 10px;
+    color: white; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
+    text-align: center; font-size: 12px; min-height: 90px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+  }
+  .flow-node:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+  .flow-node .num {
+    background: rgba(255,255,255,0.25); width: 22px; height: 22px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 12px; margin-bottom: 6px;
+  }
+  .flow-node .name { font-weight: 700; font-size: 13px; }
+  .flow-node .desc { font-size: 10px; opacity: 0.9; margin-top: 4px; }
+  .flow-node.entry { background: var(--shade); color: var(--text); border: 2px dashed var(--border); }
+  .flow-node.intake { background: var(--grad-intake); }
+  .flow-node.insurance { background: var(--grad-insurance); }
+  .flow-node.cost { background: var(--grad-cost); }
+  .flow-node.schedule { background: var(--grad-schedule); }
+  .flow-node.exit { background: var(--shade); color: var(--good); border: 2px solid var(--good); font-weight: 700; }
+  .flow-arrow {
+    text-align: center; font-size: 18px; color: var(--muted); font-weight: 700;
+  }
+  .flow-legend {
+    display: flex; gap: 18px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border);
+    font-size: 11px; color: var(--muted);
+  }
+  .flow-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .flow-legend .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Quick actions grid */
+  .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .qa-card {
+    background: var(--card); border-radius: 10px; padding: 18px;
+    box-shadow: var(--shadow-card); cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-decoration: none; color: var(--text);
+    display: block;
+  }
+  .qa-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+  .qa-card .icon { font-size: 28px; margin-bottom: 8px; }
+  .qa-card .title { font-size: 14px; font-weight: 700; }
+  .qa-card .desc { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+  .qa-card .cta { font-size: 11px; color: var(--accent); margin-top: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Morning workflow / checklist */
+  .workflow {
+    background: var(--card); border-radius: 10px; padding: 18px;
+    box-shadow: var(--shadow-card); margin-bottom: 18px;
+  }
+  .workflow h2 { margin: 0 0 12px; font-size: 14px; font-weight: 700; }
+  .workflow .step {
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .workflow .step:last-child { border: 0; }
+  .workflow .step .num {
+    background: var(--accent); color: white; width: 26px; height: 26px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; flex-shrink: 0; font-size: 13px;
+  }
+  .workflow .step.done .num { background: var(--good); }
+  .workflow .step .body { flex: 1; }
+  .workflow .step .title { font-weight: 600; font-size: 13px; }
+  .workflow .step .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .workflow .step a { color: var(--accent); text-decoration: none; font-size: 12px; font-weight: 600; }
+  .workflow .step a:hover { text-decoration: underline; }
+
+  /* Live calls + alerts */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .alert {
+    padding: 10px 14px; border-radius: 8px; margin: 8px 0; font-size: 13px;
+    border-left: 4px solid;
+  }
+  .alert.critical { background: #fee2e2; color: #7f1d1d; border-color: var(--bad); }
+  .alert.warn { background: #fef3c7; color: #78350f; border-color: var(--warn); }
+  .alert.info { background: #dbeafe; color: #1e3a8a; border-color: var(--accent); }
+
+  .footer { text-align: center; padding: 30px; font-size: 11px; color: var(--muted); }
+
+  .placeholder { color: var(--muted); padding: 20px 0; text-align: center; font-style: italic; }
+  .spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--shade); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div>
+      <h1>🦷 Bright Smile Dental · Front-Desk Hub</h1>
+      <div class="sub">AI-orchestrated patient intake · eligibility verification · risk-aware scheduling · exception management</div>
+    </div>
+    <div class="meta">
+      <div id="today-date"></div>
+      <div style="margin-top:3px"><b id="user-greeting">Good morning, Maria 👋</b></div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- KPI strip — clinic-wide signals at a glance -->
+  <div class="section-title">Today's signals</div>
+  <div class="kpis" id="kpis">
+    <div class="placeholder" style="grid-column:1/-1"><span class="spinner"></span> Loading clinic stats...</div>
+  </div>
+
+  <!-- Decision-process flow diagram -->
+  <div class="section-title">Decision process · patient call flow</div>
+  <div class="flow">
+    <h2>How an inbound call flows through the system</h2>
+    <div class="flow-diagram">
+      <div class="flow-node entry"><div class="num">📞</div><div class="name">Patient calls</div><div class="desc">PMS lookup by phone → new vs existing</div></div>
+      <div class="flow-arrow">→</div>
+      <a href="/inbound" class="flow-node intake" style="text-decoration:none">
+        <div class="num">1</div><div class="name">Intake Agent</div><div class="desc">Voice intake · collects insurance card · routes to Verification</div>
+      </a>
+      <div class="flow-arrow">→</div>
+      <a href="/verifier" class="flow-node insurance" style="text-decoration:none">
+        <div class="num">2</div><div class="name">Insurance Agent</div><div class="desc">270 request · web scrape · or carrier voice call · returns benefits</div>
+      </a>
+      <div class="flow-arrow">→</div>
+      <a href="/verifier" class="flow-node cost" style="text-decoration:none">
+        <div class="num">3</div><div class="name">Cost Estimate Agent</div><div class="desc">Treatment plan priced · deductible · max cap · COB · downgrade · OOP</div>
+      </a>
+      <div class="flow-arrow"></div>
+      <a href="/clinic" class="flow-node schedule" style="text-decoration:none" id="schedule-node"></a>
+    </div>
+    <div class="flow-diagram" style="margin-top:8px;grid-template-columns:100px 1fr 1fr 1fr 1fr 100px">
+      <div></div><div></div><div></div><div></div>
+      <div class="flow-arrow">↓</div>
+      <div></div>
+    </div>
+    <div style="text-align:center;margin-top:4px">
+      <a href="/inbound" class="flow-node exit" style="display:inline-flex;min-width:200px;text-decoration:none">
+        <div class="name">✓ Appointment confirmed</div>
+        <div class="desc">+ cost-estimate text sent · or → human in the loop</div>
+      </a>
+    </div>
+    <div class="flow-legend">
+      <span><span class="dot" style="background:var(--accent)"></span> click any agent to open its tool</span>
+      <span><span class="dot" style="background:var(--bad)"></span> failure → human in the loop</span>
+      <span><span class="dot" style="background:var(--good)"></span> SPC-driven scheduling policy (deposit if high-risk)</span>
+    </div>
+  </div>
+
+  <!-- Quick actions — tool grid -->
+  <div class="section-title">Quick actions</div>
+  <div class="quick-actions">
+    <a href="/inbound" class="qa-card">
+      <div class="icon">📞</div>
+      <div class="title">Simulate inbound call</div>
+      <div class="desc">Multi-agent orchestrator: Intake → Insurance → Cost Estimate → Scheduling, with voice/text turns.</div>
+      <div class="cta">Run a call →</div>
+    </a>
+    <a href="/verifier" class="qa-card">
+      <div class="icon">🔍</div>
+      <div class="title">Verify insurance</div>
+      <div class="desc">Look up a patient's benefits, price a treatment plan, get plain-English explanation, handle exceptions.</div>
+      <div class="cta">Open verifier →</div>
+    </a>
+    <a href="/clinic" class="qa-card">
+      <div class="icon">📊</div>
+      <div class="title">Outreach scheduler</div>
+      <div class="desc">1000-patient SPC dashboard. Critical-risk patients · auto-generated outreach campaigns · Western Electric rule findings.</div>
+      <div class="cta">View dashboard →</div>
+    </a>
+    <a href="#" onclick="runBatchOutreach();event.preventDefault();" class="qa-card">
+      <div class="icon">🚀</div>
+      <div class="title">Run morning batch</div>
+      <div class="desc">Generate today's outreach campaigns for top-50 priority patients (recall-due + critical risk).</div>
+      <div class="cta">Generate now →</div>
+    </a>
+  </div>
+
+  <!-- Two-column: morning workflow + alerts -->
+  <div class="section-title" style="margin-top:24px">Morning workflow + alerts</div>
+  <div class="two-col">
+    <div class="workflow">
+      <h2>☀ Morning routine</h2>
+      <div class="step done">
+        <div class="num">✓</div>
+        <div class="body"><div class="title">Coffee + walk the floor</div><div class="meta">10 min · daily</div></div>
+      </div>
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body"><div class="title">Review critical-risk patients</div><div class="meta" id="step-1-meta">Loading...</div></div>
+        <a href="/clinic?band=critical">Review →</a>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body"><div class="title">Verify today's appointments</div><div class="meta">Confirm insurance is still active for everyone on today's schedule</div></div>
+        <a href="/verifier">Verify →</a>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body"><div class="title">Send tomorrow's reminders</div><div class="meta" id="step-3-meta">Loading...</div></div>
+        <a href="#" onclick="runBatchOutreach();event.preventDefault();">Send →</a>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body"><div class="title">Clear inbound voicemails</div><div class="meta">Simulate any new patient calls through the orchestrator</div></div>
+        <a href="/inbound">Simulate →</a>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div class="body"><div class="title">Review AR aging</div><div class="meta" id="step-5-meta">Loading...</div></div>
+        <a href="#">Open ledger →</a>
+      </div>
+    </div>
+
+    <div class="workflow">
+      <h2>🚨 Active alerts</h2>
+      <div id="alerts">
+        <div class="placeholder"><span class="spinner"></span> Scanning patients + appointments...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent activity -->
+  <div class="section-title" style="margin-top:24px">Recent agent activity</div>
+  <div class="workflow">
+    <div id="recent-activity"><div class="placeholder">No recent activity yet — run an inbound call or send a batch outreach to populate.</div></div>
+  </div>
+</div>
+
+<div class="footer">
+  Bright Smile Dental Front-Desk Hub · Hackathon MVP · Built with MT+™ orchestration pattern · MT+™ is a trademark of Meridian Technologies IP Holdings
+</div>
+
+<script>
+async function init() {
+  const d = new Date();
+  document.getElementById('today-date').textContent = d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const h = d.getHours();
+  document.getElementById('user-greeting').textContent = (h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening') + ', Maria 👋';
+
+  // Load clinic stats
+  const stats = await fetch('/v1/clinic/stats').then(r => r.json()).catch(e => ({}));
+  renderKPIs(stats);
+
+  // Load critical-band count + recall-due insight
+  const critical = await fetch('/v1/clinic/patients?band=critical').then(r => r.json()).catch(e => ({patients:[]}));
+  const high = await fetch('/v1/clinic/patients?band=high').then(r => r.json()).catch(e => ({patients:[]}));
+  document.getElementById('step-1-meta').textContent = critical.patients.length + ' patients in critical band, ' + high.patients.length + ' in high band — call/text today';
+  document.getElementById('step-3-meta').textContent = 'Top-50 priority patients · estimated 100-150 touchpoints (SMS + calls)';
+  document.getElementById('step-5-meta').textContent = (stats.outstanding_payments?.n || 0) + ' outstanding · $' + Math.round(stats.outstanding_payments?.t || 0).toLocaleString();
+
+  // Scheduling node text
+  const schedNode = document.getElementById('schedule-node');
+  schedNode.innerHTML = '<div class="num">4</div><div class="name">Scheduling Agent</div><div class="desc">SPC + WE rules · proposes slot · deposit policy by risk band</div>';
+
+  // Alerts (composed from stats + critical patients)
+  renderAlerts(stats, critical.patients, high.patients);
+}
+document.addEventListener('DOMContentLoaded', init);
+
+function renderKPIs(s) {
+  if (!s.patients) { document.getElementById('kpis').innerHTML = '<div class="placeholder" style="grid-column:1/-1">Stats unavailable</div>'; return; }
+  const noShowPct = (100 * (s.appts_no_show || 0) / Math.max(1, s.appts_total)).toFixed(1);
+  document.getElementById('kpis').innerHTML =
+    kpi('Total patients', s.patients.toLocaleString(), '') +
+    kpi('Active appts', s.appts_total.toLocaleString(), '') +
+    kpi('No-show rate', noShowPct + '%', noShowPct > 15 ? 'critical' : 'warn', 'clinic-wide') +
+    kpi('Critical risk', (s.archetypes.find(a => a.risk_archetype === 'chronic')?.n || 0).toLocaleString(), 'critical', 'chronic archetype') +
+    kpi('Pending tx', '$' + Math.round((s.pending_treatment_total || 0)/1000) + 'K', 'warn', 'value at risk') +
+    kpi('Outstanding AR', '$' + Math.round((s.outstanding_payments?.t || 0)/1000) + 'K', 'warn', (s.outstanding_payments?.n || 0) + ' invoices');
+}
+function kpi(lbl, val, cls, sub) {
+  return '<div class="kpi ' + (cls || '') + '"><div class="lbl">' + lbl + '</div><div class="val">' + val + '</div>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+}
+
+function renderAlerts(stats, critical, high) {
+  const out = document.getElementById('alerts');
+  const alerts = [];
+  if (critical.length > 10) alerts.push({ severity: 'critical', text: '<b>' + critical.length + ' patients in critical no-show band</b> — they have >50% probability of missing their next appointment. Call them personally (script available in Outreach Scheduler).' });
+  if ((stats.outstanding_payments?.n || 0) > 200) alerts.push({ severity: 'warn', text: '<b>' + stats.outstanding_payments.n + ' outstanding invoices</b> totaling $' + Math.round(stats.outstanding_payments.t).toLocaleString() + ' — recommend AR collection campaign.' });
+  if ((stats.pending_treatment_total || 0) > 500000) alerts.push({ severity: 'info', text: '<b>$' + Math.round(stats.pending_treatment_total).toLocaleString() + ' in pending treatment plans</b> — patients haven\'t accepted. Run outreach with cost-estimate text.' });
+  alerts.push({ severity: 'info', text: 'Western Electric Rule 1 (point outside ±3σ) is firing on <b>' + critical.filter(c => c.we_critical_count > 0).length + '</b> patients — those are statistically unusual and need immediate attention.' });
+  if (alerts.length === 0) alerts.push({ severity: 'info', text: '✓ No active alerts. Operations running smoothly.' });
+  out.innerHTML = alerts.map(a => '<div class="alert ' + a.severity + '">' + a.text + '</div>').join('');
+}
+
+async function runBatchOutreach() {
+  const r = await fetch('/v1/clinic/schedule/batch', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ max: 50 })
+  }).then(r => r.json());
+  alert('✓ Generated ' + r.count + ' outreach campaigns.\n\nTotal touchpoints planned: ' +
+    r.campaigns.reduce((s, c) => s + c.n_touchpoints_planned, 0) +
+    '\n\nOpen the Outreach Scheduler to review/execute.');
+  // Refresh recent activity stub
+  document.getElementById('recent-activity').innerHTML = '<div style="font-size:13px"><b>' + new Date().toLocaleTimeString() + '</b> · Generated batch outreach campaign · <b>' + r.count + '</b> patients · <a href="/clinic">View →</a></div>';
+}
+</script>
+</body>
+</html>
