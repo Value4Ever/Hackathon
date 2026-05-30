@@ -307,7 +307,7 @@ function ttsPlanForStep(s) {
   if (/Human-in-the-loop|Staff.*Escalation/i.test(t)) {
     return { role: 'escalation', text: 'Sending a WhatsApp to Maria with the full call script and one-tap resolve buttons.' };
   }
-  if (/Cancellation Analytics|Patient Risk|Risk Signals|SPC Chart|Western Electric/i.test(t)) {
+  if (/Cancellation Analytics|Patient Risk|Risk Signals/i.test(t)) {
     return { role: 'intake_agent', text: 'Top critical patient: Abigail Rogers. Her probability of cancellation is ninety six percent across twenty eight appointments. Three independent risk signals have all triggered. Risk score one hundred percent.' };
   }
   if (/E-Signature|CFR Part 11/i.test(t)) {
